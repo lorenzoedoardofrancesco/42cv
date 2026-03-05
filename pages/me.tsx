@@ -1,7 +1,6 @@
 import { signIn, signOut } from "next-auth/react";
 import Layout from "../components/Layout";
 import collection from "lodash-es/collection";
-import LoginButtonGithub from "../components/LoginButtonGithub";
 import LoginButton42School from "../components/LoginButton42School";
 import { useState } from "react";
 import axios from "axios";
@@ -14,48 +13,57 @@ const NewUserPage = () => {
     data: { accounts, email, name },
   } = useContext(AuthContext);
   const accountsObj = collection.keyBy(accounts, "provider");
+  const is42Connected = !!accountsObj["42-school"];
 
   return (
     <Layout>
-      <h1 className="text-2xl font-bold">#Profile</h1>
-      <hr className="border-neutral-300" />
-      <div className="flex flex-col gap-2 font-bold">
-        <p>Name: {name}</p>
-        <p>Email: {email}</p>
-      </div>
-      <hr className="border-neutral-300" />
-      <h2 className="text-xl font-bold">#Account Connect</h2>
-      <hr className="border-neutral-300" />
-      <label>
-        <p className="text-neutral-600 font-bold">
-          * In order to use the service, it is essential to link with 42-school.
-        </p>
-        <LoginButton42School
-          disable={!!accountsObj["42-school"]}
-          onClick={() => signIn("42-school")}
-        />
-      </label>
-      <label>
-        <p className="text-neutral-600">
-          * Even when anonymous on 42Intra, GitHub connection is required to use
-          this service.
-        </p>
-        <LoginButtonGithub
-          disable={!!accountsObj["github"]}
-          onClick={() => signIn("github")}
-        />
-      </label>
-      <h2 className="text-xl font-bold text-red-600">#Danger Zone</h2>
-      <hr className="border-neutral-300" />
-      <label>
-        <p className="text-neutral-600 font-bold">
-          * This operation cannot be canceled.
-        </p>
-        <DeleteUser />
-      </label>
-      <hr className="border-neutral-300" />
-      <Link href={"/"}>
-        <p>← Return Edit Badge Page</p>
+      {/* Profile */}
+      <section className="space-y-4">
+        <h1 className="text-xl font-semibold text-white">Profile</h1>
+        <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-lg space-y-2">
+          <div className="flex gap-2 text-sm">
+            <span className="text-neutral-500 w-24 shrink-0">Name</span>
+            <span className="text-neutral-200">{name}</span>
+          </div>
+          <div className="flex gap-2 text-sm">
+            <span className="text-neutral-500 w-24 shrink-0">Email</span>
+            <span className="text-neutral-200">{email}</span>
+          </div>
+          <div className="flex gap-2 text-sm">
+            <span className="text-neutral-500 w-24 shrink-0">42 Account</span>
+            {is42Connected ? (
+              <span className="text-green-400">Connected</span>
+            ) : (
+              <span className="text-red-400">Not connected</span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Connect 42 account if not linked */}
+      {!is42Connected && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold text-white">Connect 42 Account</h2>
+          <p className="text-sm text-neutral-500">
+            Required to generate your badge.
+          </p>
+          <LoginButton42School onClick={() => signIn("42-school")} />
+        </section>
+      )}
+
+      {/* Danger Zone */}
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-red-500">Danger Zone</h2>
+        <div className="p-4 bg-red-950/20 border border-red-900/50 rounded-lg space-y-3">
+          <p className="text-sm text-neutral-400">
+            Removes your account from the 42Badge database. Your badge URL will stop working and your cached 42 data will be deleted. Your 42 intra account is not affected.
+          </p>
+          <DeleteUser />
+        </div>
+      </section>
+
+      <Link href={"/"} className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
+        ← Back to badges
       </Link>
     </Layout>
   );
@@ -65,16 +73,16 @@ const DeleteUser = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleOnClick = async () => {
-    if (confirm("* This operation cannot be canceled. Are you sure?")) {
+    if (confirm("This operation cannot be canceled. Are you sure?")) {
       setIsLoading(true);
       try {
         await axios.delete("/api/v2/me", {
           withCredentials: true,
         });
-        alert("Delete User Success.");
+        alert("Account deleted.");
         signOut();
       } catch (error) {
-        alert("Delete User Fail...");
+        alert("Failed to delete account.");
       }
       setIsLoading(false);
     }
@@ -82,11 +90,11 @@ const DeleteUser = () => {
 
   return (
     <button
-      className={`w-full h-12 rounded text-xl flex gap-2 justify-center items-center bg-red-600 text-white disabled:opacity-75 disabled:cursor-not-allowed`}
+      className="w-full py-2 rounded-lg text-sm font-medium bg-red-700 hover:bg-red-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       disabled={isLoading}
       onClick={handleOnClick}
     >
-      <p>{`Delete User`}</p>
+      {isLoading ? "Deleting..." : "Delete Account"}
     </button>
   );
 };

@@ -2,12 +2,17 @@ import React from "react";
 
 export type InfomationProps = {
   data: [key: string, value: string][];
+  color: string;
+  hasProfileImage?: boolean;
+  startY?: number;
 };
 
-const Infomation = ({ data }: InfomationProps) => {
-  const startY = 83.83;
-  const startDelay = 0.5;
-  const distance = 24;
+const Infomation = ({ data, color, hasProfileImage, startY: startYProp }: InfomationProps) => {
+  const startY = startYProp ?? 88;
+  const startDelay = 0.4;
+  const distance = 22;
+  const labelX = hasProfileImage ? 100 : 25;
+  const valueX = hasProfileImage ? 170 : 95;
 
   return (
     <>
@@ -16,102 +21,38 @@ const Infomation = ({ data }: InfomationProps) => {
           key={`${key}-${value}`}
           className="fadeIn"
           style={{
-            animationDelay: `${startDelay + i * 0.25}s`,
+            animationDelay: `${startDelay + i * 0.15}s`,
           }}
         >
-          <g filter="url(#shadow)">
-            <text
-              fill="black"
-              fillOpacity="0.6"
-              xmlSpace="preserve"
-              style={{
-                whiteSpace: "nowrap",
-              }}
-              fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-              fontSize="14"
-              fontWeight="bold"
-              letterSpacing="0em"
-            >
-              <tspan x="19" y={startY + i * distance + 2}>
-                {key}
-              </tspan>
-            </text>
-            <text
-              fill="black"
-              fillOpacity="0.6"
-              xmlSpace="preserve"
-              style={{
-                whiteSpace: "nowrap",
-              }}
-              fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-              fontSize="14"
-              fontWeight="bold"
-              letterSpacing="0em"
-            >
-              <tspan x="65" y={startY + i * distance + 2}>
-                -
-              </tspan>
-            </text>
-            <text
-              fill="black"
-              fillOpacity="0.6"
-              xmlSpace="preserve"
-              style={{
-                whiteSpace: "nowrap",
-              }}
-              fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-              fontSize="14"
-              fontWeight="bold"
-              letterSpacing="0em"
-            >
-              <tspan x="75" y={startY + i * distance + 2}>
-                {value}
-              </tspan>
-            </text>
-          </g>
-
+          {/* Label */}
           <text
-            fill="white"
+            fill={color}
             xmlSpace="preserve"
             style={{
               whiteSpace: "nowrap",
             }}
-            fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-            fontSize="14"
-            fontWeight="bold"
+            fontFamily="'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif"
+            fontSize="13"
+            fontWeight="600"
             letterSpacing="0em"
           >
-            <tspan x="17" y={startY + i * distance}>
-              {key}
+            <tspan x={labelX} y={startY + i * distance}>
+              {key.toLowerCase()}:
             </tspan>
           </text>
+          {/* Value */}
           <text
-            fill="white"
+            fill="#8b949e"
             xmlSpace="preserve"
             style={{
               whiteSpace: "nowrap",
             }}
-            fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-            fontSize="14"
-            fontWeight="bold"
+            fontFamily="'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif"
+            fontSize="13"
+            fontWeight="400"
             letterSpacing="0em"
           >
-            <tspan x="63" y={startY + i * distance}>
-              -
-            </tspan>
-          </text>
-          <text
-            fill="white"
-            xmlSpace="preserve"
-            style={{
-              whiteSpace: "nowrap",
-            }}
-            fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-            fontSize="14"
-            fontWeight="bold"
-            letterSpacing="0em"
-          >
-            <tspan x="73" y={startY + i * distance}>
+            <tspan x={valueX} y={startY + i * distance}>
               {value}
             </tspan>
           </text>

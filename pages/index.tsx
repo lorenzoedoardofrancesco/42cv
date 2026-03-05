@@ -67,41 +67,42 @@ const StatsOptions = ({
   }, [isDisplayEmail, isDisplayName]);
 
   return (
-    <details>
-      <summary>Options</summary>
-      <div className="flex flex-col gap-2">
-        <p className="border border-red-300 bg-red-100 rounded p-2 text-base text-bold">
-          ⚠️ Depending on the browser cache and CDN cache, this option may take
-          more than 12 hours to change.
+    <details className="group">
+      <summary className="cursor-pointer text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
+        Advanced Options
+      </summary>
+      <div className="flex flex-col gap-3 mt-3 p-4 bg-neutral-900 border border-neutral-800 rounded-lg">
+        <p className="border border-amber-800/50 bg-amber-950/30 text-amber-200/80 rounded-lg p-3 text-sm">
+          Changes may take up to 12 hours due to browser and CDN cache.
         </p>
-        <label className="flex gap-2">
-          <p className="flex flex-0 font-bold text-base">Display Name</p>
+        <label className="flex items-center gap-3">
+          <span className="text-sm text-neutral-400 w-28">Display Name</span>
           <select
-            className="flex flex-1 text-base border rounded appearance-none px-1"
+            className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 appearance-none focus:outline-none focus:border-neutral-500"
             value={isDisplayName ? "true" : "false"}
             onChange={(option) =>
               setIsDisplayName(option.target.value === "true")
             }
           >
-            <option value={"true"}>true</option>
-            <option value={"false"}>false</option>
+            <option value={"true"}>Yes</option>
+            <option value={"false"}>No</option>
           </select>
         </label>
-        <label className="flex gap-2">
-          <p className="flex flex-0 font-bold text-base">Display Email</p>
+        <label className="flex items-center gap-3">
+          <span className="text-sm text-neutral-400 w-28">Display Email</span>
           <select
-            className="flex flex-1 text-base border rounded appearance-none px-1"
+            className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 appearance-none focus:outline-none focus:border-neutral-500"
             value={isDisplayEmail ? "true" : "false"}
             onChange={(option) =>
               setIsDisplayEmail(option.target.value === "true")
             }
           >
-            <option value={"true"}>true</option>
-            <option value={"false"}>false</option>
+            <option value={"true"}>Yes</option>
+            <option value={"false"}>No</option>
           </select>
         </label>
         <button
-          className="transition-colors border rounded hover:bg-neutral-50 disabled:bg-neutral-50 disabled:cursor-not-allowed"
+          className="text-sm px-4 py-1.5 border border-neutral-700 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isFetching}
           onClick={updateOption}
         >
@@ -111,6 +112,29 @@ const StatsOptions = ({
     </details>
   );
 };
+
+const SelectField = ({
+  label,
+  value,
+  onChange,
+  children,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}) => (
+  <label className="flex items-center gap-3">
+    <span className="text-sm text-neutral-400 w-28 shrink-0">{label}</span>
+    <select
+      className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 appearance-none focus:outline-none focus:border-neutral-500"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {children}
+    </select>
+  </label>
+);
 
 const Home = () => {
   const { data } = useContext(AuthContext);
@@ -138,6 +162,7 @@ const Home = () => {
 
   const [isDisplayName, setIsDisplayName] = useState(data.isDisplayName);
   const [isDisplayEmail, setIsDisplayEmail] = useState(data.isDisplayEmail);
+  const [isDisplayPhoto, setIsDisplayPhoto] = useState(false);
 
   const coalition = useMemo(
     () => getCoalitions(coalitionId, data.extended42Data.coalitions),
@@ -181,119 +206,146 @@ const Home = () => {
 
   return (
     <Layout>
-      <h1 id="42badge" className="text-3xl font-bold">
-        42Badge
-      </h1>
-      <p>🚀 Dynamically generated 42 badge for your git readmes.</p>
-      <h2 id="stats" className="text-2xl font-bold">
-        💡 42 Stats Card!
-      </h2>
-      <p>
-        Copy-paste this into your markdown content, and that&aposs it. Simple!
-      </p>
-      <div className="mx-auto max-w-full overflow-y-auto">
-        <StatsWrapper
-          data={{
-            login: data.extended42Data.login,
-            name: isDisplayName && data.extended42Data.displayname,
-            campus: `42${primaryCampus.name}`,
-            begin_at: selectedCursus.begin_at,
-            end_at: selectedCursus.end_at,
-            blackholed_at: selectedCursus.blackholed_at,
-            cursus: selectedCursus.cursus.name,
-            grade: selectedCursus.grade ?? "Pisciner",
-            logo: coalition.image_url,
-            cover: coalition.cover_url,
-            color: coalition.color,
-            email: isDisplayEmail && data.extended42Data.email,
-            level: selectedCursus.level,
-          }}
-        />
+      {/* Hero */}
+      <div className="text-center pt-4">
+        <h1 className="text-4xl font-bold tracking-tight text-white">
+          42Badge
+        </h1>
+        <p className="mt-2 text-neutral-500">
+          Dynamically generated 42 badges for your git readmes.
+        </p>
       </div>
-      <label className="flex gap-2">
-        <p className="flex flex-0 font-bold text-base">Cursus</p>
-        <select
-          className="flex flex-1 text-base border rounded appearance-none px-1"
-          value={cursusId}
-          onChange={(option) => setCursusId(option.target.value)}
-        >
-          {data.extended42Data.cursus_users.map((cursus_user) => (
-            <option key={cursus_user.cursus_id} value={cursus_user.cursus_id}>
-              {cursus_user.cursus.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="flex gap-2">
-        <p className="flex flex-0 font-bold text-base">Coalition</p>
-        <select
-          className="flex flex-1 text-base border rounded appearance-none px-1"
-          value={coalitionId}
-          onChange={(option) => setCoalitionId(option.target.value)}
-        >
-          <option value={"undefined"}>Undefined(No coalition)</option>
-          <option value={"piscine"}>Piscine</option>
-          {data.extended42Data.coalitions.map((colation) => (
-            <option key={colation.id} value={colation.id}>
-              {colation.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <StatsOptions
-        isDisplayEmail={isDisplayEmail}
-        isDisplayName={isDisplayName}
-        setIsDisplayEmail={setIsDisplayEmail}
-        setIsDisplayName={setIsDisplayName}
-      />
-      <label>
-        <p className="text-neutral-600">*url</p> <Code code={statsUrl} />
-      </label>
-      <label>
-        <p className="text-neutral-600">*markdown</p>{" "}
-        <Code
-          code={`[![${data.extended42Data.login}'s 42 stats](${statsUrl})](https://42badge.vercel.app)`}
+
+      {/* Stats Card Section */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold text-white">Stats Card</h2>
+        <p className="text-sm text-neutral-500">
+          Copy-paste the URL into your markdown and that&apos;s it.
+        </p>
+
+        {/* Preview */}
+        <div className="flex justify-center">
+          <div className="overflow-x-auto max-w-full">
+            <StatsWrapper
+              data={{
+                login: data.extended42Data.login,
+                name: isDisplayName && data.extended42Data.displayname,
+                campus: `42${primaryCampus.name}`,
+                begin_at: selectedCursus.begin_at,
+                end_at: selectedCursus.end_at,
+                blackholed_at: selectedCursus.blackholed_at,
+                cursus: selectedCursus.cursus.name,
+                grade: selectedCursus.grade ?? "Pisciner",
+                logo: coalition.image_url,
+                cover: coalition.cover_url,
+                color: coalition.color,
+                email: isDisplayEmail && data.extended42Data.email,
+                level: selectedCursus.level,
+                profileImage: isDisplayPhoto
+                  ? data.extended42Data.image?.versions?.medium ||
+                    data.extended42Data.image?.link
+                  : null,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="space-y-3 p-4 bg-neutral-900/50 border border-neutral-800 rounded-lg">
+          <SelectField label="Cursus" value={cursusId} onChange={setCursusId}>
+            {data.extended42Data.cursus_users.map((cursus_user) => (
+              <option key={cursus_user.cursus_id} value={cursus_user.cursus_id}>
+                {cursus_user.cursus.name}
+              </option>
+            ))}
+          </SelectField>
+          <SelectField label="Coalition" value={coalitionId} onChange={setCoalitionId}>
+            <option value={"undefined"}>Undefined</option>
+            <option value={"piscine"}>Piscine</option>
+            {data.extended42Data.coalitions.map((colation) => (
+              <option key={colation.id} value={colation.id}>
+                {colation.name}
+              </option>
+            ))}
+          </SelectField>
+          <SelectField
+            label="Show Photo"
+            value={isDisplayPhoto ? "true" : "false"}
+            onChange={(v) => setIsDisplayPhoto(v === "true")}
+          >
+            <option value={"true"}>Yes</option>
+            <option value={"false"}>No</option>
+          </SelectField>
+        </div>
+
+        <StatsOptions
+          isDisplayEmail={isDisplayEmail}
+          isDisplayName={isDisplayName}
+          setIsDisplayEmail={setIsDisplayEmail}
+          setIsDisplayName={setIsDisplayName}
         />
-      </label>
-      <label>
-        <p className="text-neutral-600">*html</p>{" "}
-        <Code
-          code={`<a href="https://42badge.vercel.app"><img src="${statsUrl}" alt="${data.extended42Data.login}'s 42 stats" /></a>`}
-        />
-      </label>
-      <hr />
-      <h2 id="stats" className="text-2xl font-bold">
-        ✅ 42 ProjectScore Badge!
-      </h2>
-      <p>
-        Copy-paste this into your markdown content, and that&aposs it. Simple!
-      </p>
-      {projectList.map((project) => (
-        <details key={project.id}>
-          <summary>
-            <div className="inline-flex gap-2">
-              <h3 className="text-lg font-semibold">{project.project.name}</h3>
-              <ProjectScore data={project} />
-            </div>
-          </summary>
+
+        {/* Code snippets */}
+        <div className="space-y-2">
           <label>
-            <p className="text-neutral-600">*url</p>{" "}
-            <Code code={`${projectUrl}/${project.id}`} />
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">URL</span>
+            <Code code={statsUrl} />
           </label>
           <label>
-            <p className="text-neutral-600">*markdown</p>{" "}
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Markdown</span>
             <Code
-              code={`[![${data.extended42Data.login}'s 42 ${project.project.name} Score](${projectUrl}/${project.id})](https://42badge.vercel.app)`}
+              code={`[![${data.extended42Data.login}'s 42 stats](${statsUrl})](https://42badge.vercel.app)`}
             />
           </label>
           <label>
-            <p className="text-neutral-600">*html</p>{" "}
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">HTML</span>
             <Code
-              code={`<a href="https://42badge.vercel.app"><img src="${projectUrl}/${project.id}" alt="${data.extended42Data.login}'s 42 ${project.project.name} Score" /></a>`}
+              code={`<a href="https://42badge.vercel.app"><img src="${statsUrl}" alt="${data.extended42Data.login}'s 42 stats" /></a>`}
             />
           </label>
-        </details>
-      ))}
+        </div>
+      </section>
+
+      <hr className="border-neutral-800" />
+
+      {/* Project Score Section */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold text-white">Project Scores</h2>
+        <p className="text-sm text-neutral-500">
+          Badge for each project. Copy the markdown into your readme.
+        </p>
+
+        <div className="space-y-1">
+          {projectList.map((project) => (
+            <details key={project.id} className="group">
+              <summary className="cursor-pointer flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-neutral-900 transition-colors">
+                <span className="text-sm font-medium text-neutral-300 group-open:text-white">
+                  {project.project.name}
+                </span>
+                <ProjectScore data={project} />
+              </summary>
+              <div className="space-y-2 pl-3 pb-3">
+                <label>
+                  <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">URL</span>
+                  <Code code={`${projectUrl}/${project.id}`} />
+                </label>
+                <label>
+                  <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Markdown</span>
+                  <Code
+                    code={`[![${data.extended42Data.login}'s 42 ${project.project.name} Score](${projectUrl}/${project.id})](https://42badge.vercel.app)`}
+                  />
+                </label>
+                <label>
+                  <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">HTML</span>
+                  <Code
+                    code={`<a href="https://42badge.vercel.app"><img src="${projectUrl}/${project.id}" alt="${data.extended42Data.login}'s 42 ${project.project.name} Score" /></a>`}
+                  />
+                </label>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
     </Layout>
   );
 };

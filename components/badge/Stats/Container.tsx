@@ -9,18 +9,36 @@ export type ContainerProps = {
 const Container: React.FC<PropsWithChildren<ContainerProps>> = ({
   children,
   color,
-  cover_url,
   height,
 }) => {
   return (
     <svg
-      width="500"
+      width="495"
       height={height + 10}
-      viewBox={`0 0 500 ${height + 10}`}
+      viewBox={`0 0 495 ${height + 10}`}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
     >
+      <defs>
+        <filter
+          id="shadow"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
+          <feGaussianBlur
+            stdDeviation="1"
+            result="effect1_foregroundBlur_101_3"
+          />
+        </filter>
+      </defs>
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -37,89 +55,29 @@ const Container: React.FC<PropsWithChildren<ContainerProps>> = ({
         }}
       />
       <g>
-        <g filter="url(#container_shadow)">
-          <rect x="4" y="5" width="492" height={height} rx="5" fill="black" fillOpacity="0.25" />
-        </g>
-        <rect x="5" y="5" width="490" height={height} rx="5" fill={color} />
+        {/* Card background */}
+        <rect x="5" y="5" width="485" height={height} rx="10" fill="#0d1117" />
         <rect
           x="5"
           y="5"
-          width="490"
+          width="485"
           height={height}
-          rx="5"
-          fill="black"
-          fillOpacity="0.2"
+          rx="10"
+          fill={color}
+          fillOpacity="0.06"
         />
-        <image
-          x="5"
-          y="5"
-          width="490"
-          height={height}
-          xlinkHref={cover_url}
-          preserveAspectRatio="xMinYMid slice"
-          clipPath="url(#container_clip)"
-        />
+        {/* Border */}
         <rect
-          x="4.5"
-          y="4.5"
-          width="491"
-          height={height + 1}
-          rx="5.5"
-          stroke="#E4E2E2"
+          x="5.5"
+          y="5.5"
+          width="484"
+          height={height - 1}
+          rx="9.5"
+          stroke={color}
+          strokeOpacity="0.3"
         />
       </g>
       {children}
-      <defs>
-        <filter
-          id="shadow"
-          filterUnits="userSpaceOnUse"
-          colorInterpolationFilters="sRGB"
-        >
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend
-            mode="normal"
-            in="SourceGraphic"
-            in2="BackgroundImageFix"
-            result="shape"
-          />
-          <feGaussianBlur
-            stdDeviation="2"
-            result="effect1_foregroundBlur_101_3"
-          />
-        </filter>
-        <filter
-          id="container_shadow"
-          x="0"
-          y="-4"
-          width="500"
-          height="200"
-          filterUnits="userSpaceOnUse"
-          colorInterpolationFilters="sRGB"
-        >
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend
-            mode="normal"
-            in="SourceGraphic"
-            in2="BackgroundImageFix"
-            result="shape"
-          />
-          <feGaussianBlur
-            stdDeviation="2"
-            result="effect1_foregroundBlur_101_2"
-          />
-        </filter>
-        <rect
-          id="container_rect"
-          x="5"
-          y="5"
-          width="490"
-          height={height}
-          rx="5"
-        />
-        <clipPath id="container_clip">
-          <use xlinkHref="#container_rect" />
-        </clipPath>
-      </defs>
     </svg>
   );
 };

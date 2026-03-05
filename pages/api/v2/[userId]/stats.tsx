@@ -76,11 +76,19 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
           ).campus_id
       ) ?? user.extended42Data.campus[0];
 
-    const [logo, cover] = await Promise.all([
+    const profileImageUrl =
+      user.extended42Data.image?.versions?.small ||
+      user.extended42Data.image?.link ||
+      user.extended42Data.image_url;
+
+    const [logo, cover, profileImage] = await Promise.all([
       getBase64ImageFromUrl(encodeURI(coalition.image_url)),
       getBase64ImageFromUrl(
         coalition.cover_url ? encodeURI(coalition.cover_url) : `${BASE_URL}/assets/cover/default.jpg`
       ),
+      profileImageUrl
+        ? getBase64ImageFromUrl(encodeURI(profileImageUrl)).catch(() => null)
+        : Promise.resolve(null),
     ]);
 
     if (process.env.NODE_ENV === "production") {
@@ -108,6 +116,7 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
             color: coalition.color,
             email: user.isDisplayEmail && user.extended42Data.email,
             level: cursus_user.level,
+            profileImage: profileImage,
           }}
         />
       )

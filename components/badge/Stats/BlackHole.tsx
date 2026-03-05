@@ -5,7 +5,9 @@ export type BlackHoleProps = {
     begin_at: string;
     blackholed_at?: string | null;
     end_at?: string | null;
+    grade: string;
   };
+  color: string;
 };
 
 const getRemainDay = (end: string) => {
@@ -23,10 +25,92 @@ const getDayColor = (day: number) => {
   return "rgb(255,69,0)";
 };
 
-const BlackHole = ({ data }: BlackHoleProps) => {
-  const reaminDay = getRemainDay(data.blackholed_at);
+const InfoBox = ({
+  color,
+  title,
+  titleColor,
+  value,
+}: {
+  color?: string;
+  title: string;
+  titleColor: string;
+  value: string;
+}) => (
+  <>
+    <rect
+      className="fadeIn"
+      style={{ animationDelay: "1.0s" }}
+      x="328"
+      y="71"
+      width="150"
+      height="48"
+      rx="8"
+      fill="#161b22"
+    />
+    <rect
+      className="fadeIn"
+      style={{ animationDelay: "1.0s" }}
+      x="328"
+      y="71"
+      width="150"
+      height="48"
+      rx="8"
+      stroke="#30363d"
+      strokeWidth="1"
+      fill="none"
+    />
+    <text
+      fill={titleColor}
+      xmlSpace="preserve"
+      className="fadeIn"
+      style={{
+        animationDelay: "1.25s",
+        whiteSpace: "nowrap",
+      }}
+      fontFamily="'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif"
+      fontSize="9"
+      fontWeight="600"
+      letterSpacing="0em"
+      textAnchor="middle"
+    >
+      <tspan x="403" y="90">
+        {title}
+      </tspan>
+    </text>
+    <text
+      fill={color || "#8b949e"}
+      xmlSpace="preserve"
+      className="fadeIn"
+      style={{
+        animationDelay: "1.5s",
+        whiteSpace: "nowrap",
+      }}
+      fontFamily="'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif"
+      fontSize="11"
+      fontWeight="600"
+      letterSpacing="0em"
+      textAnchor="middle"
+    >
+      <tspan x="403" y="108">
+        {value}
+      </tspan>
+    </text>
+  </>
+);
 
-  if (data.blackholed_at && reaminDay < 0)
+const BlackHole = ({ data, color }: BlackHoleProps) => {
+  const reaminDay = data.blackholed_at
+    ? getRemainDay(data.blackholed_at)
+    : null;
+
+  const isPisciner = data.grade === "Pisciner";
+  const beginDate = new Date(data.begin_at).toISOString().substring(0, 10);
+  const endDate = data.end_at
+    ? new Date(data.end_at).toISOString().substring(0, 10)
+    : null;
+
+  // Absorbed by black hole
+  if (reaminDay !== null && reaminDay < 0)
     return (
       <g
         dangerouslySetInnerHTML={{
@@ -35,194 +119,38 @@ const BlackHole = ({ data }: BlackHoleProps) => {
       />
     );
 
-  if (!data.blackholed_at) {
+  // Has blackhole — show days remaining
+  if (data.blackholed_at) {
     return (
-      <>
-        <rect
-          className="fadeIn"
-          style={{
-            animationDelay: `1.0s`,
-          }}
-          x="328"
-          y="71"
-          width="156"
-          height="48"
-          rx="5"
-          fill="black"
-          fillOpacity="0.4"
-        />
-        <g filter="url(#shadow)">
-          <text
-            fill="black"
-            fillOpacity="0.6"
-            xmlSpace="preserve"
-            className="fadeIn"
-            style={{
-              animationDelay: `1.25s`,
-              whiteSpace: "nowrap",
-            }}
-            fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-            fontSize="8"
-            fontWeight="bold"
-            letterSpacing="0em"
-          >
-            <tspan x="367.344" y="86">
-              Period learned in 42!
-            </tspan>
-          </text>
-        </g>
-        <text
-          fill="#ffc221"
-          xmlSpace="preserve"
-          className="fadeIn"
-          style={{
-            animationDelay: `1.25s`,
-            whiteSpace: "nowrap",
-          }}
-          fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-          fontSize="8"
-          fontWeight="bold"
-          letterSpacing="0em"
-        >
-          <tspan x="365.344" y="84">
-            Period learned in 42!
-          </tspan>
-        </text>
-        <g filter="url(#shadow)">
-          <text
-            fill="black"
-            fillOpacity="0.6"
-            xmlSpace="preserve"
-            className="fadeIn"
-            style={{
-              animationDelay: `1.5s`,
-              whiteSpace: "nowrap",
-            }}
-            fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-            fontSize="10"
-            fontWeight="bold"
-            letterSpacing="0em"
-          >
-            <tspan x="351.916" y="106">
-              {new Date(data.begin_at).toISOString().substring(0, 10)} ~{" "}
-              {data.end_at &&
-                new Date(data.end_at).toISOString().substring(0, 10)}{" "}
-            </tspan>
-          </text>
-        </g>
-        <text
-          fill={`rgb(83, 210, 122)`}
-          xmlSpace="preserve"
-          className="fadeIn"
-          style={{
-            animationDelay: `1.5s`,
-            whiteSpace: "nowrap",
-          }}
-          fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-          fontSize="10"
-          fontWeight="bold"
-          letterSpacing="0em"
-        >
-          <tspan x="349.916" y="104">
-            {new Date(data.begin_at).toISOString().substring(0, 10)} ~{" "}
-            {data.end_at &&
-              new Date(data.end_at).toISOString().substring(0, 10)}{" "}
-          </tspan>
-        </text>
-      </>
+      <InfoBox
+        titleColor="#ffc221"
+        title="BlackHole absorption"
+        color={getDayColor(reaminDay)}
+        value={
+          reaminDay <= 1 ? "few hours left!" : `${reaminDay} days left!`
+        }
+      />
     );
   }
 
-  return (
-    <>
-      <rect
-        className="fadeIn"
-        style={{
-          animationDelay: `1.0s`,
-        }}
-        x="328"
-        y="71"
-        width="156"
-        height="48"
-        rx="5"
-        fill="black"
-        fillOpacity="0.4"
+  // Has end date — show period
+  if (endDate) {
+    return (
+      <InfoBox
+        titleColor={color}
+        title={isPisciner ? "Piscine period" : "Student period"}
+        value={`${beginDate} ~ ${endDate}`}
       />
-      <g filter="url(#shadow)">
-        <text
-          fill="black"
-          fillOpacity="0.6"
-          xmlSpace="preserve"
-          className="fadeIn"
-          style={{
-            animationDelay: `1.25s`,
-            whiteSpace: "nowrap",
-          }}
-          fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-          fontSize="8"
-          fontWeight="bold"
-          letterSpacing="0em"
-        >
-          <tspan x="367.344" y="86">
-            BlackHole absorption
-          </tspan>
-        </text>
-      </g>
-      <text
-        fill="#ffc221"
-        xmlSpace="preserve"
-        className="fadeIn"
-        style={{
-          animationDelay: `1.25s`,
-          whiteSpace: "nowrap",
-        }}
-        fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-        fontSize="8"
-        fontWeight="bold"
-        letterSpacing="0em"
-      >
-        <tspan x="365.344" y="84">
-          BlackHole absorption
-        </tspan>
-      </text>
-      <g filter="url(#shadow)">
-        <text
-          fill="black"
-          fillOpacity="0.6"
-          xmlSpace="preserve"
-          className="fadeIn"
-          style={{
-            animationDelay: `1.5s`,
-            whiteSpace: "nowrap",
-          }}
-          fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-          fontSize="18"
-          fontWeight="bold"
-          letterSpacing="0em"
-        >
-          <tspan x="351.916" y="110">
-            {reaminDay <= 1 ? `few hour left!` : `${reaminDay} days left!`}
-          </tspan>
-        </text>
-      </g>
-      <text
-        fill={getDayColor(reaminDay)}
-        xmlSpace="preserve"
-        className="fadeIn"
-        style={{
-          animationDelay: `1.5s`,
-          whiteSpace: "nowrap",
-        }}
-        fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-        fontSize="18"
-        fontWeight="bold"
-        letterSpacing="0em"
-      >
-        <tspan x="349.916" y="108">
-          {reaminDay <= 1 ? `few hour left!` : `${reaminDay} days left!`}
-        </tspan>
-      </text>
-    </>
+    );
+  }
+
+  // No end date — still active
+  return (
+    <InfoBox
+      titleColor={color}
+      title={isPisciner ? "Pisciner since" : "Student since"}
+      value={beginDate}
+    />
   );
 };
 

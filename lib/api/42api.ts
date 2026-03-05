@@ -105,6 +105,15 @@ export type UserBase = {
   displayname: string;
   image_url: string;
   new_image_url: string;
+  image?: {
+    link?: string;
+    versions?: {
+      large?: string;
+      medium?: string;
+      small?: string;
+      micro?: string;
+    };
+  };
   "staff?": boolean;
   correction_point: number;
   pool_month: string;

@@ -16,7 +16,7 @@ const getCoalitions = (
     undefined: {
       image_url: `${baseUrl}/assets/logo/unknown.svg`,
       cover_url: `${baseUrl}/assets/cover/default.jpg`,
-      color: "#00babc",
+      color: "#e0e0e0",
     },
   };
 

@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
-import LoginButtonGithub from "../../components/LoginButtonGithub";
 import LoginButton42School from "../../components/LoginButton42School";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import _42BadgeLogo from "../../components/42BadgeLogo";
 import { useContext, useEffect, useState } from "react";
 import Layout from "../../components/Layout";
@@ -62,33 +61,26 @@ const SignInPage: NextPage = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-2">
-        <div className="flex justify-center">
-          <Link href={"/"}>
-            <_42BadgeLogo className="w-48 h-48 fill-black" />
-          </Link>
-        </div>
-        <h1 className="text-3xl font-bold">#Sign In</h1>
-        <hr className="border-neutral-300" />
-        {error && (
-          <div className="border-2 border-red-300 bg-red-100 rounded p-2 text-base">
+      <div className="flex flex-col gap-4 items-center pt-8">
+        <Link href={"/"}>
+          <_42BadgeLogo className="w-32 h-32 fill-white" />
+        </Link>
+        <h1 className="text-2xl font-bold text-white">Sign In</h1>
+        <hr className="border-neutral-800 w-full" />
+        {error && error !== "SessionRequired" && (
+          <div className="border border-red-800/50 bg-red-950/30 text-red-200/80 rounded-lg p-3 text-sm w-full">
             {errors[error]}
           </div>
         )}
-        <LoginButton42School
-          onClick={() =>
-            signIn("42-school", {
-              callbackUrl: callbackUrl,
-            })
-          }
-        />
-        <LoginButtonGithub
-          onClick={() =>
-            signIn("github", {
-              callbackUrl: callbackUrl,
-            })
-          }
-        />
+        <div className="flex flex-col gap-2 w-full">
+          <LoginButton42School
+            onClick={() =>
+              signIn("42-school", {
+                callbackUrl: callbackUrl,
+              })
+            }
+          />
+        </div>
       </div>
     </Layout>
   );

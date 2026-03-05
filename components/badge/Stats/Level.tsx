@@ -11,7 +11,7 @@ const Level = ({ color, level, height }: LevelProps) => {
   const level_percentage = (parseFloat((level % 1).toFixed(2)) * 100).toFixed(
     0
   );
-  const progressWidth = parseInt(level_percentage) * 4.7;
+  const progressWidth = (parseInt(level_percentage) / 100) * 445;
 
   return (
     <>
@@ -30,65 +30,63 @@ const Level = ({ color, level, height }: LevelProps) => {
           `,
         }}
       />
+      {/* Bar background */}
       <rect
         className="fadeIn"
         style={{
           animationDelay: "1.25s",
         }}
-        x="14"
+        x="25"
         y={height - 40}
-        width="470"
-        height="35"
-        rx="5"
-        fill="black"
-        fillOpacity="0.4"
+        width="445"
+        height="30"
+        rx="15"
+        fill="#161b22"
       />
       <rect
-        className={`progress_bar`}
+        className="fadeIn"
+        style={{
+          animationDelay: "1.25s",
+        }}
+        x="25"
+        y={height - 40}
+        width="445"
+        height="30"
+        rx="15"
+        stroke="#30363d"
+        strokeWidth="1"
+        fill="none"
+      />
+      {/* Bar fill */}
+      <rect
+        className="progress_bar"
         style={{
           animationDelay: "1.5s",
         }}
-        x="14"
+        x="25"
         y={height - 40}
-        width="470"
-        height="35"
-        rx="5"
+        width="445"
+        height="30"
+        rx="15"
         fill={color}
+        fillOpacity="0.6"
       />
-      <g filter="url(#shadow)">
-        <text
-          fill="black"
-          fillOpacity="0.6"
-          xmlSpace="preserve"
-          className={`fadeIn`}
-          style={{
-            animationDelay: "1.5s",
-            whiteSpace: "nowrap",
-          }}
-          fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-          fontSize="14"
-          fontWeight="bold"
-          letterSpacing="0em"
-        >
-          <tspan x="209" y={height - 16}>
-            level {level_integer} - {level_percentage}%
-          </tspan>
-        </text>
-      </g>
+      {/* Level text */}
       <text
-        fill="white"
+        fill="#e6edf3"
         xmlSpace="preserve"
-        className={`fadeIn`}
+        className="fadeIn"
         style={{
           animationDelay: "1.5s",
           whiteSpace: "nowrap",
         }}
-        fontFamily="'Noto Sans', Arial, Helvetica, 'Sans serif', Ubuntu"
-        fontSize="14"
-        fontWeight="bold"
+        fontFamily="'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif"
+        fontSize="12"
+        fontWeight="600"
         letterSpacing="0em"
+        textAnchor="middle"
       >
-        <tspan x="207" y={height - 18}>
+        <tspan x="247" y={height - 20}>
           level {level_integer} - {level_percentage}%
         </tspan>
       </text>
