@@ -16,6 +16,7 @@ const BASE_URL = process.env.VERCEL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
+
 class FTAccountNotLinked extends Error {
   constructor() {
     super();
@@ -81,15 +82,9 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       user.extended42Data.image?.link ||
       user.extended42Data.image_url;
 
-    const [logo, cover, profileImage] = await Promise.all([
-      getBase64ImageFromUrl(encodeURI(coalition.image_url)),
-      getBase64ImageFromUrl(
-        coalition.cover_url ? encodeURI(coalition.cover_url) : `${BASE_URL}/assets/cover/default.jpg`
-      ),
-      profileImageUrl
-        ? getBase64ImageFromUrl(encodeURI(profileImageUrl)).catch(() => null)
-        : Promise.resolve(null),
-    ]);
+    const profileImage = profileImageUrl
+      ? await getBase64ImageFromUrl(encodeURI(profileImageUrl)).catch(() => null)
+      : null;
 
     if (process.env.NODE_ENV === "production") {
       const ExpiresDate = new Date();
@@ -111,8 +106,6 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
             blackholed_at: cursus_user.blackholed_at,
             cursus: cursus_user.cursus.name,
             grade: cursus_user.grade ?? "Pisciner",
-            logo: logo,
-            cover: cover,
             color: coalition.color,
             email: user.isDisplayEmail && user.extended42Data.email,
             level: cursus_user.level,

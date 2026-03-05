@@ -5,12 +5,11 @@ export type HeaderProps = {
   login: string;
   campus: string;
   cursus: string;
-  logo_url: string;
 };
 
 const UNDEFINED_COLOR = "#e0e0e0";
 
-const Header = ({ color, login, campus, cursus, logo_url }: HeaderProps) => {
+const Header = ({ color, login, campus, cursus }: HeaderProps) => {
   const isDefault = color === UNDEFINED_COLOR;
   const logoFill = isDefault ? "white" : color;
 

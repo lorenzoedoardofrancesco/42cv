@@ -236,8 +236,6 @@ const Home = () => {
                 blackholed_at: selectedCursus.blackholed_at,
                 cursus: selectedCursus.cursus.name,
                 grade: selectedCursus.grade ?? "Pisciner",
-                logo: coalition.image_url,
-                cover: coalition.cover_url,
                 color: coalition.color,
                 email: isDisplayEmail && data.extended42Data.email,
                 level: selectedCursus.level,

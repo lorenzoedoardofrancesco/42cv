@@ -2,7 +2,6 @@ import React, { PropsWithChildren } from "react";
 
 export type ContainerProps = {
   color: string;
-  cover_url: string;
   height: number;
 };
 

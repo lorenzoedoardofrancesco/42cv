@@ -17,8 +17,6 @@ export type StatsProps = {
     name?: string | null;
     email?: string | null;
     color: string;
-    cover: string;
-    logo: string;
     level: number;
     profileImage?: string | null;
   };
@@ -43,13 +41,12 @@ const Stats = ({ data }: StatsProps) => {
   const avatarCy = infoCenterY;
 
   return (
-    <Container height={height} color={data.color} cover_url={data.cover}>
+    <Container height={height} color={data.color}>
       <Header
         color={data.color}
         campus={data.campus}
         cursus={data.cursus}
         login={data.login}
-        logo_url={data.logo}
       />
       {data.profileImage && (
         <g>
