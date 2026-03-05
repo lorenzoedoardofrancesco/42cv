@@ -77,10 +77,11 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
           ).campus_id
       ) ?? user.extended42Data.campus[0];
 
-    const profileImageUrl =
-      user.extended42Data.image?.versions?.small ||
-      user.extended42Data.image?.link ||
-      user.extended42Data.image_url;
+    const profileImageUrl = user.isDisplayPhoto
+      ? user.extended42Data.image?.versions?.small ||
+        user.extended42Data.image?.link ||
+        user.extended42Data.image_url
+      : null;
 
     const profileImage = profileImageUrl
       ? await getBase64ImageFromUrl(encodeURI(profileImageUrl)).catch(() => null)

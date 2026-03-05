@@ -45,6 +45,7 @@ model User {
 
   isDisplayEmail Boolean @default(true)
   isDisplayName  Boolean @default(true)
+  isDisplayPhoto Boolean @default(false)
 }
 
 model VerificationToken {
