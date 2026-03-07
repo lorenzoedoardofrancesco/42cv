@@ -275,14 +275,17 @@ const Home = () => {
               </option>
             ))}
           </SelectField>
-          <SelectField label="Coalition" value={coalitionId} onChange={setCoalitionId}>
-            <option value={"undefined"}>Undefined</option>
+          <SelectField label="Design" value={coalitionId} onChange={setCoalitionId}>
+            <option value={"undefined"}>Neutral</option>
             <option value={"piscine"}>Piscine</option>
             {data.extended42Data.coalitions.map((colation) => (
               <option key={colation.id} value={colation.id}>
                 {colation.name}
               </option>
             ))}
+            {selectedCursus.level >= 21 && (
+              <option value={"level21"}>Gold - Level 21</option>
+            )}
           </SelectField>
         </div>
 

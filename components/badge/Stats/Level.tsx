@@ -4,9 +4,10 @@ export type LevelProps = {
   color: string;
   level: number;
   height: number;
+  isLevel21?: boolean;
 };
 
-const Level = ({ color, level, height }: LevelProps) => {
+const Level = ({ color, level, height, isLevel21 = false }: LevelProps) => {
   const level_integer = Math.floor(level);
   const level_percentage = (parseFloat((level % 1).toFixed(2)) * 100).toFixed(
     0
@@ -18,11 +19,21 @@ const Level = ({ color, level, height }: LevelProps) => {
   return (
     <>
       <defs>
-        <linearGradient id="bar_gradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.95" />
-          <stop offset="45%" stopColor={color} stopOpacity="0.7" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.4" />
-        </linearGradient>
+        {isLevel21 ? (
+          <linearGradient id="bar_gradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#8B6914" stopOpacity="0.9" />
+            <stop offset="30%" stopColor="#C8A400" stopOpacity="1" />
+            <stop offset="55%" stopColor="#FFD700" stopOpacity="1" />
+            <stop offset="75%" stopColor="#E8C100" stopOpacity="1" />
+            <stop offset="100%" stopColor="#C8A400" stopOpacity="0.9" />
+          </linearGradient>
+        ) : (
+          <linearGradient id="bar_gradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.95" />
+            <stop offset="45%" stopColor={color} stopOpacity="0.7" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.4" />
+          </linearGradient>
+        )}
         <linearGradient id="bar_gloss" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.28" />
           <stop offset="35%" stopColor="#ffffff" stopOpacity="0.06" />

@@ -4,12 +4,14 @@ import { fontFaceStyle } from "../../../lib/fontBase64";
 export type ContainerProps = {
   color: string;
   height: number;
+  isLevel21?: boolean;
 };
 
 const Container: React.FC<PropsWithChildren<ContainerProps>> = ({
   children,
   color,
   height,
+  isLevel21 = false,
 }) => {
   return (
     <svg
@@ -38,22 +40,46 @@ const Container: React.FC<PropsWithChildren<ContainerProps>> = ({
             result="effect1_foregroundBlur_101_3"
           />
         </filter>
-        <linearGradient id="card_bg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#12161f" />
-          <stop offset="45%" stopColor="#0e1420" />
-          <stop offset="100%" stopColor="#090c14" />
-        </linearGradient>
-        <linearGradient id="card_sheen" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.07" />
-          <stop offset="30%" stopColor="#ffffff" stopOpacity="0.03" />
-          <stop offset="60%" stopColor="#ffffff" stopOpacity="0.00" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.00" />
-        </linearGradient>
-        <linearGradient id="border_grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#9ca3af" stopOpacity="0.9" />
-          <stop offset="50%" stopColor="#6b7280" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#374151" stopOpacity="0.4" />
-        </linearGradient>
+        {isLevel21 ? (
+          <>
+            <linearGradient id="card_bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#14100a" />
+              <stop offset="45%" stopColor="#100d07" />
+              <stop offset="100%" stopColor="#0a0804" />
+            </linearGradient>
+            <linearGradient id="card_sheen" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#FFD700" stopOpacity="0.10" />
+              <stop offset="30%" stopColor="#C8A400" stopOpacity="0.05" />
+              <stop offset="60%" stopColor="#FFD700" stopOpacity="0.00" />
+              <stop offset="100%" stopColor="#FFD700" stopOpacity="0.00" />
+            </linearGradient>
+            <linearGradient id="border_grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#FFD700" stopOpacity="0.95" />
+              <stop offset="35%" stopColor="#E8C100" stopOpacity="0.80" />
+              <stop offset="65%" stopColor="#C8A400" stopOpacity="0.70" />
+              <stop offset="100%" stopColor="#8B6914" stopOpacity="0.50" />
+            </linearGradient>
+          </>
+        ) : (
+          <>
+            <linearGradient id="card_bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#12161f" />
+              <stop offset="45%" stopColor="#0e1420" />
+              <stop offset="100%" stopColor="#090c14" />
+            </linearGradient>
+            <linearGradient id="card_sheen" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.07" />
+              <stop offset="30%" stopColor="#ffffff" stopOpacity="0.03" />
+              <stop offset="60%" stopColor="#ffffff" stopOpacity="0.00" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.00" />
+            </linearGradient>
+            <linearGradient id="border_grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#9ca3af" stopOpacity="0.9" />
+              <stop offset="50%" stopColor="#6b7280" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#374151" stopOpacity="0.4" />
+            </linearGradient>
+          </>
+        )}
         <linearGradient id="separator" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stopColor={color} stopOpacity="0" />
           <stop offset="20%" stopColor={color} stopOpacity="0.4" />

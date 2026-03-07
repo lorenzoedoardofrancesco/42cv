@@ -12,10 +12,6 @@ import {
 // 12hour
 const EXPIRE_TIME = 12 * 60 * 60;
 
-const BASE_URL = process.env.VERCEL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
-
 
 class FTAccountNotLinked extends Error {
   constructor() {
@@ -60,8 +56,7 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
               user.extended42Data.coalitions.length - 1
             ].id.toString()
           : "undefined"),
-      user.extended42Data.coalitions,
-      BASE_URL
+      user.extended42Data.coalitions
     );
 
     const primaryCampus =
