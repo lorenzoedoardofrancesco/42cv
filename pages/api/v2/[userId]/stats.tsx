@@ -110,6 +110,7 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
               ? user.extended42Data.projects_users.filter(
                   (p) =>
                     p["validated?"] === true &&
+                    !p.project.parent_id &&
                     p.cursus_ids.includes(cursus_user.cursus_id)
                 ).length
               : null,

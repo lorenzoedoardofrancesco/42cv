@@ -1,29 +1,42 @@
 <div align="center">
   <img src="/public/42badge_logo.svg" height="128px" alt="42Badge logo">
   <h1>42Badge</h1>
-  <p>🚀 Dynamically generated 42 badge for your git readmes.</p>
+  <p>Dynamically generated badges and a recruiter-ready CV for 42 students.</p>
   <a href="https://github.com/lorenzoedoardofrancesco/42badge/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" /></a>
   <a href="https://42badge.vercel.app"><img src="https://img.shields.io/badge/deployed%20on-Vercel-black.svg?logo=vercel" alt="Deployed on Vercel" /></a>
 </div>
 
-## About this project
+## ✨ Features
 
-This project is a revival of **[badge42](https://github.com/JaeSeoKim/badge42)**, originally created by [JaeSeoKim](https://github.com/JaeSeoKim) in 2020.
+### 📄 Public CV — share your profile with recruiters
 
-The original service has been defunct since early 2023: the maintainer was serving in the military and the Vercel free tier limits caused the service to go down. The codebase was also built on outdated dependencies (Next.js 12, React 17, Prisma 3) that had accumulated breaking changes over 3 years.
+Generate a clean, recruiter-friendly CV page at `42cv.vercel.app/your-login`:
 
-I forked the project, brought it back to life with a full dependency upgrade, redesigned the badge with a premium look, and redeployed it so that 42 students can once again embed live stats in their GitHub profiles for recruiters and the community to see.
+- Full name, campus, grade, cursus, pool cohort
+- GitHub, LinkedIn, address, phone number in the header
+- Skill bars from 42 API
+- Validated projects list with scores and outstanding vote ratings
+- Achievements — you choose which ones to display
+- Light / dark mode (visitor can toggle, you set the default)
+- Helvetica Neue typography throughout
 
-**Changes from the original:**
-- `Next.js 12 → 14`, `React 17 → 18`, `Prisma 3 → 5`
-- `MySQL` → `PostgreSQL` (Neon)
-- Fixed broken `42 API` compatibility
-- Fixed SVG badge animations (CSS was not rendering in served images)
-- Rebranded to `42Badge`
+### 🎴 Stats badge — embed live stats in your GitHub README
+
+- Login, campus, cursus, grade, level progress bar
+- Coalition colors + 5 custom themes (Midnight, Carbon, Rose, Neon) and a Gold theme unlocked at level 21
+- BlackHole countdown, or student / piscine period dates
+- Optional profile photo, display name, email, validated project count
+- Individual project score badge for each project
 
 ## 👀 Preview
 
-[![lsimanic's 42 stats](https://42badge.vercel.app/api/v2/cmmdrgqgb0000lmzlzuxh3798/stats?cursusId=21&coalitionId=undefined)](https://42badge.vercel.app)
+### CV page
+
+> Live example: [42cv.vercel.app/lsimanic](https://42cv.vercel.app/lsimanic)
+
+### Stats badge
+
+[![lsimanic's 42 stats](https://42badge.vercel.app/api/v2/cmmdrgqgb0000lmzlzuxh3798/stats?cursusId=21&coalitionId=carbon)](https://42badge.vercel.app)
 <br>
 [![lsimanic's 42 stats](https://42badge.vercel.app/api/v2/cmmdrgqgb0000lmzlzuxh3798/stats?cursusId=9&coalitionId=piscine)](https://42badge.vercel.app)
 
@@ -33,22 +46,11 @@ I forked the project, brought it back to life with a full dependency upgrade, re
 | **ft_traceroute**     | [![lsimanic's 42 ft_traceroute Score](https://42badge.vercel.app/api/v2/cmmdrgqgb0000lmzlzuxh3798/project/3684239)](https://projects.intra.42.fr/projects/42cursus-ft_traceroute/projects_users/3684239) |
 | **C Piscine Rush 00** | [![lsimanic's 42 C Piscine Rush 00 Score](https://42badge.vercel.app/api/v2/cmmdrgqgb0000lmzlzuxh3798/project/2787028)](https://projects.intra.42.fr/projects/c-piscine-rush-00/projects_users/2787028) |
 
-## ✨ Features
-
-- 🎴 **Stats card** — login, campus, cursus, grade, level progress bar
-- 🎨 **Design themes** — coalition colors + 5 custom themes (Midnight, Carbon, Rose, Neon) and a Gold theme unlocked at level 21
-- 🕳️ **BlackHole countdown** — days remaining, or student/piscine period dates
-- 🏆 **Project score badges** — individual badge for each project (pass/fail/score)
-- 📸 **Profile photo** — optional circular avatar on the card
-- 📊 **Validated project count** — shows how many projects you've validated in the selected cursus
-- ⚙️ **Display options** — toggle name, email, photo, and project count visibility (stored server-side)
-- 🔄 **Auto-refresh** — 42 data syncs every 12 hours
-
 ## 🤓 Usage
 
 1. Go to <https://42badge.vercel.app/> and sign in with your 42 account
-2. Generate the code snippet for your profile card
-3. Copy-paste into your markdown content. Simple 🥳
+2. **CV:** enable *Make profile public*, fill in your contact info and select achievements — your CV is live at `42cv.vercel.app/your-login`
+3. **Badge:** copy the URL or markdown snippet and paste it into your GitHub README
 
 ## 🛠️ Self-hosting
 
@@ -82,6 +84,22 @@ The badge URL must return a valid SVG. If your account isn't properly linked or 
 
 **Can I use a custom domain?**
 Yes, deploy your own instance (see Self-hosting) and update the badge URLs to point to your domain.
+
+## 🗂️ About this project
+
+This project is a revival of **[badge42](https://github.com/JaeSeoKim/badge42)**, originally created by [JaeSeoKim](https://github.com/JaeSeoKim) in 2020.
+
+The original service went down in early 2023: the maintainer was serving in the military and the Vercel free tier limits caused the service to go offline. The codebase had also accumulated breaking changes across three years of dependency drift (Next.js 12, React 17, Prisma 3).
+
+I forked it, did a full dependency upgrade, rewrote and redesigned the badge, added the public CV feature, and redeployed it.
+
+**Changes from the original:**
+- `Next.js 12 → 14`, `React 17 → 18`, `Prisma 3 → 5`
+- `MySQL` → `PostgreSQL` (Neon)
+- Fixed broken `42 API` compatibility
+- Fixed SVG badge animations (CSS was not rendering in served images)
+- Rebranded to `42Badge`
+- Added public CV / profile page
 
 ## 👥 Original Contributors
 

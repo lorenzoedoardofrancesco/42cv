@@ -72,11 +72,8 @@ const StatsOptions = ({
   }, [isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount]);
 
   return (
-    <details className="group">
-      <summary className="cursor-pointer text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
-        Advanced Options
-      </summary>
-      <div className="flex flex-col gap-3 mt-3 p-4 bg-neutral-900 border border-neutral-800 rounded-lg">
+    <div>
+      <div className="flex flex-col gap-3 p-4 bg-neutral-900 border border-neutral-800 rounded-lg">
         <p className="border border-amber-800/50 bg-amber-950/30 text-amber-200/80 rounded-lg p-3 text-sm">
           Changes may take up to 12 hours due to browser and CDN cache.
         </p>
@@ -140,7 +137,7 @@ const StatsOptions = ({
           {isFetching ? "Saving..." : "Save"}
         </button>
       </div>
-    </details>
+    </div>
   );
 };
 
@@ -166,6 +163,72 @@ const SelectField = ({
     </select>
   </label>
 );
+
+const FEEDBACK_TYPES = [
+  { value: "bug", label: "🐛 Bug report" },
+  { value: "feature", label: "✨ Feature request" },
+  { value: "other", label: "💬 Other" },
+] as const;
+
+const FeedbackForm = ({ login }: { login: string }) => {
+  const [type, setType] = useState<string>("feature");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+
+  const submit = () => {
+    if (!title.trim()) return;
+    const labelMap: Record<string, string> = { bug: "bug", feature: "enhancement", other: "question" };
+    const issueTitle = encodeURIComponent(`[${type}] ${title.trim()}`);
+    const issueBody = encodeURIComponent(`**Submitted by:** @${login}\n\n${body.trim()}`);
+    const label = labelMap[type] ?? "question";
+    window.open(
+      `https://github.com/lorenzoedoardofrancesco/42badge/issues/new?title=${issueTitle}&body=${issueBody}&labels=${label}`,
+      "_blank"
+    );
+  };
+
+  return (
+    <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-lg space-y-3">
+      <div className="flex gap-2">
+        {FEEDBACK_TYPES.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setType(value)}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+              type === value
+                ? "bg-neutral-700 border-neutral-500 text-white"
+                : "bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-neutral-200"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <input
+        type="text"
+        placeholder="Short title…"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
+      />
+      <textarea
+        placeholder="Tell us more (optional)…"
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        rows={3}
+        className="w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600 resize-none"
+      />
+      <button
+        onClick={submit}
+        disabled={!title.trim()}
+        className="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white border border-neutral-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+        Open GitHub issue
+      </button>
+    </div>
+  );
+};
 
 const Home = () => {
   const { data } = useContext(AuthContext);
@@ -195,6 +258,14 @@ const Home = () => {
   const [isDisplayEmail, setIsDisplayEmail] = useState(data.isDisplayEmail);
   const [isDisplayPhoto, setIsDisplayPhoto] = useState(data.isDisplayPhoto);
   const [isDisplayProjectCount, setIsDisplayProjectCount] = useState((data as any).isDisplayProjectCount ?? true);
+  const [isPublicProfile, setIsPublicProfile] = useState((data as any).isPublicProfile ?? false);
+  const [isDisplayOutstandingVotes, setIsDisplayOutstandingVotes] = useState((data as any).isDisplayOutstandingVotes ?? true);
+  const [selectedAchievementIds, setSelectedAchievementIds] = useState<number[]>((data as any).selectedAchievementIds ?? []);
+  const [githubUrl, setGithubUrl] = useState<string>((data as any).githubUrl ?? "");
+  const [linkedinUrl, setLinkedinUrl] = useState<string>((data as any).linkedinUrl ?? "");
+  const [address, setAddress] = useState<string>((data as any).address ?? "");
+  const [phone, setPhone] = useState<string>((data as any).phone ?? "");
+  const [defaultDarkMode, setDefaultDarkMode] = useState<boolean>((data as any).defaultDarkMode ?? false);
 
   const coalition = useMemo(
     () => getCoalitions(coalitionId, data.extended42Data.coalitions),
@@ -216,8 +287,11 @@ const Home = () => {
   const projectList = useMemo(
     () =>
       collection
-        .filter(data.extended42Data.projects_users, (o) =>
-          o.cursus_ids.includes(parseInt(cursusId))
+        .filter(
+          data.extended42Data.projects_users,
+          (o) =>
+            !o.project.parent_id &&
+            o.cursus_ids.includes(parseInt(cursusId))
         )
         .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at)),
     [cursusId, data.extended42Data.projects_users]
@@ -238,22 +312,204 @@ const Home = () => {
 
   return (
     <Layout>
-      {/* Hero */}
-      <div className="text-center pt-4">
-        <h1 className="text-4xl font-bold tracking-tight text-white">
-          42Badge
-        </h1>
-        <p className="mt-2 text-neutral-500">
-          Dynamically generated 42 badges for your git readmes.
-        </p>
-      </div>
+      {/* 42CV Hero + Section */}
+      <section className="space-y-4">
+        <div className="text-center pt-4">
+          <div className="flex items-center justify-center gap-3">
+            <h1 className="text-4xl font-bold tracking-tight text-white">42CV</h1>
+            <span className="px-2 py-0.5 text-xs font-bold tracking-widest uppercase rounded-full bg-green-500/20 text-green-400 border border-green-500/40 animate-pulse">
+              New
+            </span>
+          </div>
+          <p className="mt-2 text-neutral-500">
+            A recruiter-friendly CV page — shareable in one link.
+          </p>
+        </div>
+        <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-lg space-y-4">
+          <label className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm text-neutral-200">Make profile public</p>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Anyone with the link can view your profile — no login required.
+              </p>
+            </div>
+            <button
+              onClick={async () => {
+                const next = !isPublicProfile;
+                setIsPublicProfile(next);
+                await axios.patch("/api/v2/me", {
+                  isDisplayEmail: isDisplayEmail ? "true" : "false",
+                  isDisplayName: isDisplayName ? "true" : "false",
+                  isPublicProfile: next ? "true" : "false",
+                });
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                isPublicProfile ? "bg-green-600" : "bg-neutral-700"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isPublicProfile ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </label>
+          {isPublicProfile && (
+            <>
+              <label className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-neutral-200">Show outstanding votes</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Display star ratings on your validated projects.
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    const next = !isDisplayOutstandingVotes;
+                    setIsDisplayOutstandingVotes(next);
+                    await axios.patch("/api/v2/me", {
+                      isDisplayEmail: isDisplayEmail ? "true" : "false",
+                      isDisplayName: isDisplayName ? "true" : "false",
+                      isDisplayOutstandingVotes: next ? "true" : "false",
+                    });
+                  }}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                    isDisplayOutstandingVotes ? "bg-green-600" : "bg-neutral-700"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isDisplayOutstandingVotes ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </label>
+              {/* Default theme */}
+              <label className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-neutral-200">Default CV theme</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Initial appearance for visitors who open your profile.
+                  </p>
+                </div>
+                <div className="flex rounded-lg border border-neutral-700 overflow-hidden shrink-0">
+                  {([
+                    { value: false, icon: "☀️", label: "Light" },
+                    { value: true,  icon: "🌙", label: "Dark"  },
+                  ] as const).map(({ value, icon, label }) => (
+                    <button
+                      key={label}
+                      onClick={async () => {
+                        setDefaultDarkMode(value);
+                        await axios.patch("/api/v2/me", {
+                          isDisplayEmail: isDisplayEmail ? "true" : "false",
+                          isDisplayName: isDisplayName ? "true" : "false",
+                          defaultDarkMode: value ? "true" : "false",
+                        });
+                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+                        defaultDarkMode === value
+                          ? "bg-neutral-600 text-white"
+                          : "bg-neutral-800 text-neutral-400 hover:text-neutral-200"
+                      }`}
+                    >
+                      <span>{icon}</span>
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </label>
+
+              {/* Contact links */}
+              <div>
+                <p className="text-sm text-neutral-200 mb-1">Contact & Links</p>
+                <p className="text-xs text-neutral-500 mb-3">Shown in the CV page header.</p>
+                <div className="space-y-2">
+                  {([
+                    { label: "GitHub URL", value: githubUrl, set: setGithubUrl, key: "githubUrl", placeholder: "https://github.com/username" },
+                    { label: "LinkedIn URL", value: linkedinUrl, set: setLinkedinUrl, key: "linkedinUrl", placeholder: "https://linkedin.com/in/username" },
+                    { label: "Address", value: address, set: setAddress, key: "address", placeholder: "City, Country" },
+                    { label: "Phone", value: phone, set: setPhone, key: "phone", placeholder: "+41 79 000 00 00" },
+                  ] as const).map(({ label, value, set, key, placeholder }) => (
+                    <div key={key} className="flex items-center gap-3">
+                      <span className="text-xs text-neutral-400 w-24 shrink-0">{label}</span>
+                      <input
+                        type="text"
+                        value={value}
+                        placeholder={placeholder}
+                        onChange={(e) => set(e.target.value)}
+                        onBlur={async () => {
+                          await axios.patch("/api/v2/me", {
+                            isDisplayEmail: isDisplayEmail ? "true" : "false",
+                            isDisplayName: isDisplayName ? "true" : "false",
+                            [key]: value,
+                          });
+                        }}
+                        className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Achievements selection */}
+              {(data.extended42Data.achievements ?? []).length > 0 && (
+                <div>
+                  <p className="text-sm text-neutral-200 mb-1">Achievements on CV</p>
+                  <p className="text-xs text-neutral-500 mb-3">Select which achievements to display on your public profile.</p>
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {(data.extended42Data.achievements as any[])
+                      .filter((a) => a.visible !== false)
+                      .map((a) => {
+                        const checked = selectedAchievementIds.includes(a.id);
+                        return (
+                          <label key={a.id} className="flex items-start gap-3 cursor-pointer group">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={async () => {
+                                const next = checked
+                                  ? selectedAchievementIds.filter((id) => id !== a.id)
+                                  : [...selectedAchievementIds, a.id];
+                                setSelectedAchievementIds(next);
+                                await axios.patch("/api/v2/me", {
+                                  isDisplayEmail: isDisplayEmail ? "true" : "false",
+                                  isDisplayName: isDisplayName ? "true" : "false",
+                                  selectedAchievementIds: next,
+                                });
+                              }}
+                              className="mt-0.5 accent-green-500 shrink-0"
+                            />
+                            <div>
+                              <p className="text-xs font-medium text-neutral-300 group-hover:text-white transition-colors">{a.name}</p>
+                              <p className="text-xs text-neutral-500">{a.description}</p>
+                            </div>
+                          </label>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Your CV link</span>
+                <Code code={`https://42cv.vercel.app/${data.extended42Data.login}`} />
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+
+      <div className="border-t-2 border-neutral-800 my-4" />
 
       {/* Stats Card Section */}
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-white">Stats Card</h2>
-        <p className="text-sm text-neutral-500">
-          Copy-paste the URL into your markdown and that&apos;s it.
-        </p>
+        <div className="text-center pt-4">
+          <h2 className="text-4xl font-bold tracking-tight text-white">42Badge</h2>
+          <p className="mt-2 text-neutral-500">
+            Dynamically generated badges for your git readmes.
+          </p>
+        </div>
 
         {/* Preview */}
         <div className="flex justify-center">
@@ -279,6 +535,7 @@ const Home = () => {
                   ? data.extended42Data.projects_users.filter(
                       (p) =>
                         p["validated?"] === true &&
+                        !p.project.parent_id &&
                         p.cursus_ids.includes(parseInt(cursusId))
                     ).length
                   : null,
@@ -385,6 +642,19 @@ const Home = () => {
             </details>
           ))}
         </div>
+      </section>
+
+      <div className="border-t-2 border-neutral-800 my-4" />
+
+      {/* Feedback Section */}
+      <section className="space-y-4">
+        <div className="text-center pt-4">
+          <h2 className="text-4xl font-bold tracking-tight text-white">Feedback</h2>
+          <p className="mt-2 text-neutral-500">
+            Found a bug or have an idea? Submit it directly as a GitHub issue — takes 10 seconds.
+          </p>
+        </div>
+        <FeedbackForm login={data.extended42Data.login} />
       </section>
     </Layout>
   );

@@ -68,11 +68,19 @@ class ValidateError extends Error {
 
 const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount } = req.body as {
+    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount, isPublicProfile, isDisplayOutstandingVotes, selectedAchievementIds, githubUrl, linkedinUrl, address, phone, defaultDarkMode } = req.body as {
       isDisplayEmail?: string;
       isDisplayName?: string;
       isDisplayPhoto?: string;
       isDisplayProjectCount?: string;
+      isPublicProfile?: string;
+      isDisplayOutstandingVotes?: string;
+      selectedAchievementIds?: number[];
+      githubUrl?: string;
+      linkedinUrl?: string;
+      address?: string;
+      phone?: string;
+      defaultDarkMode?: string;
     };
     if (!isDisplayEmail || !isDisplayName)
       throw new ValidateError(
@@ -98,6 +106,20 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         ...(isDisplayProjectCount !== undefined && {
           isDisplayProjectCount: isDisplayProjectCount === "true",
         }),
+        ...(isPublicProfile !== undefined && {
+          isPublicProfile: isPublicProfile === "true",
+        }),
+        ...(isDisplayOutstandingVotes !== undefined && {
+          isDisplayOutstandingVotes: isDisplayOutstandingVotes === "true",
+        }),
+        ...(selectedAchievementIds !== undefined && {
+          selectedAchievementIds: { set: selectedAchievementIds },
+        }),
+        ...(githubUrl !== undefined && { githubUrl: githubUrl || null }),
+        ...(linkedinUrl !== undefined && { linkedinUrl: linkedinUrl || null }),
+        ...(address !== undefined && { address: address || null }),
+        ...(phone !== undefined && { phone: phone || null }),
+        ...(defaultDarkMode !== undefined && { defaultDarkMode: defaultDarkMode === "true" }),
       },
     });
 

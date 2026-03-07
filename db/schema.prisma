@@ -43,10 +43,33 @@ model User {
   ftSchoolVerified Boolean @default(false)
   extended42Data   Json?
 
-  isDisplayEmail        Boolean @default(true)
-  isDisplayName         Boolean @default(true)
-  isDisplayPhoto        Boolean @default(false)
-  isDisplayProjectCount Boolean @default(true)
+  isDisplayEmail              Boolean @default(true)
+  isDisplayName               Boolean @default(true)
+  isDisplayPhoto              Boolean @default(false)
+  isDisplayProjectCount       Boolean @default(true)
+  isPublicProfile             Boolean @default(false)
+  isDisplayOutstandingVotes   Boolean @default(true)
+  selectedAchievementIds      Int[]   @default([])
+  githubUrl                   String?
+  linkedinUrl                 String?
+  address                     String?
+  phone                       String?
+  defaultDarkMode             Boolean @default(false)
+}
+
+model ProjectDescription {
+  slug             String   @id
+  description      String?
+  correctionNumber Int?
+  checkedAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model TeamStat {
+  teamId           Int      @id
+  totalEvals       Int      @default(0)
+  outstandingCount Int      @default(0)
+  checkedAt        DateTime @default(now())
 }
 
 model VerificationToken {
