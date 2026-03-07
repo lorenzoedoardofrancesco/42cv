@@ -13,7 +13,7 @@ const Infomation = ({ data, color, hasProfileImage, startY: startYProp, distance
   const startDelay = 0.4;
   const distance = distanceProp ?? 22;
   const labelX = hasProfileImage ? 105 : 25;
-  const valueX = hasProfileImage ? 158 : 95;
+  const valueX = labelX + 70;
 
   return (
     <>
@@ -38,7 +38,7 @@ const Infomation = ({ data, color, hasProfileImage, startY: startYProp, distance
             letterSpacing="0em"
           >
             <tspan x={labelX} y={startY + i * distance}>
-              {key.toLowerCase()}:
+              {key}:
             </tspan>
           </text>
           {/* Value */}

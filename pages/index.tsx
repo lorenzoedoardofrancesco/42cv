@@ -23,12 +23,7 @@ const StatsWrapper = ({ data }: StatsProps) => {
   }, [...Object.values(data)]);
 
   return (
-    <div
-      style={{
-        width: "500px",
-        height: "245px",
-      }}
-    >
+    <div style={{ width: "500px" }}>
       {isShow && <Stats data={data} />}
     </div>
   );
@@ -38,18 +33,22 @@ type StatsOptionsProps = {
   isDisplayName: boolean;
   isDisplayEmail: boolean;
   isDisplayPhoto: boolean;
+  isDisplayProjectCount: boolean;
   setIsDisplayName: (value: boolean) => void;
   setIsDisplayEmail: (value: boolean) => void;
   setIsDisplayPhoto: (value: boolean) => void;
+  setIsDisplayProjectCount: (value: boolean) => void;
 };
 
 const StatsOptions = ({
   isDisplayEmail,
   isDisplayName,
   isDisplayPhoto,
+  isDisplayProjectCount,
   setIsDisplayEmail,
   setIsDisplayName,
   setIsDisplayPhoto,
+  setIsDisplayProjectCount,
 }: StatsOptionsProps) => {
   const [isFetching, setIsFetching] = useState(false);
   const updateOption = useCallback(async () => {
@@ -59,6 +58,7 @@ const StatsOptions = ({
         isDisplayEmail: isDisplayEmail ? "true" : "false",
         isDisplayName: isDisplayName ? "true" : "false",
         isDisplayPhoto: isDisplayPhoto ? "true" : "false",
+        isDisplayProjectCount: isDisplayProjectCount ? "true" : "false",
       });
     } catch (error) {
       console.error(error);
@@ -69,7 +69,7 @@ const StatsOptions = ({
       }
     }
     setIsFetching(false);
-  }, [isDisplayEmail, isDisplayName, isDisplayPhoto]);
+  }, [isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount]);
 
   return (
     <details className="group">
@@ -113,6 +113,19 @@ const StatsOptions = ({
             value={isDisplayPhoto ? "true" : "false"}
             onChange={(option) =>
               setIsDisplayPhoto(option.target.value === "true")
+            }
+          >
+            <option value={"true"}>Yes</option>
+            <option value={"false"}>No</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-3">
+          <span className="text-sm text-neutral-400 w-28">Projects</span>
+          <select
+            className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 appearance-none focus:outline-none focus:border-neutral-500"
+            value={isDisplayProjectCount ? "true" : "false"}
+            onChange={(option) =>
+              setIsDisplayProjectCount(option.target.value === "true")
             }
           >
             <option value={"true"}>Yes</option>
@@ -181,6 +194,7 @@ const Home = () => {
   const [isDisplayName, setIsDisplayName] = useState(data.isDisplayName);
   const [isDisplayEmail, setIsDisplayEmail] = useState(data.isDisplayEmail);
   const [isDisplayPhoto, setIsDisplayPhoto] = useState(data.isDisplayPhoto);
+  const [isDisplayProjectCount, setIsDisplayProjectCount] = useState((data as any).isDisplayProjectCount ?? true);
 
   const coalition = useMemo(
     () => getCoalitions(coalitionId, data.extended42Data.coalitions),
@@ -261,6 +275,13 @@ const Home = () => {
                   ? data.extended42Data.image?.versions?.medium ||
                     data.extended42Data.image?.link
                   : null,
+                projectCount: isDisplayProjectCount
+                  ? data.extended42Data.projects_users.filter(
+                      (p) =>
+                        p["validated?"] === true &&
+                        p.cursus_ids.includes(parseInt(cursusId))
+                    ).length
+                  : null,
               }}
             />
           </div>
@@ -297,9 +318,11 @@ const Home = () => {
           isDisplayEmail={isDisplayEmail}
           isDisplayName={isDisplayName}
           isDisplayPhoto={isDisplayPhoto}
+          isDisplayProjectCount={isDisplayProjectCount}
           setIsDisplayEmail={setIsDisplayEmail}
           setIsDisplayName={setIsDisplayName}
           setIsDisplayPhoto={setIsDisplayPhoto}
+          setIsDisplayProjectCount={setIsDisplayProjectCount}
         />
 
         {/* Code snippets */}

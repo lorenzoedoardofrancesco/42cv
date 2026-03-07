@@ -68,10 +68,11 @@ class ValidateError extends Error {
 
 const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { isDisplayEmail, isDisplayName, isDisplayPhoto } = req.body as {
+    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount } = req.body as {
       isDisplayEmail?: string;
       isDisplayName?: string;
       isDisplayPhoto?: string;
+      isDisplayProjectCount?: string;
     };
     if (!isDisplayEmail || !isDisplayName)
       throw new ValidateError(
@@ -93,6 +94,9 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         isDisplayName: isDisplayName === "true",
         ...(isDisplayPhoto !== undefined && {
           isDisplayPhoto: isDisplayPhoto === "true",
+        }),
+        ...(isDisplayProjectCount !== undefined && {
+          isDisplayProjectCount: isDisplayProjectCount === "true",
         }),
       },
     });

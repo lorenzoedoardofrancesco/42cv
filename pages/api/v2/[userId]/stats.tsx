@@ -106,6 +106,13 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
             email: user.isDisplayEmail && user.extended42Data.email,
             level: cursus_user.level,
             profileImage: profileImage,
+            projectCount: (user as any).isDisplayProjectCount ?? true
+              ? user.extended42Data.projects_users.filter(
+                  (p) =>
+                    p["validated?"] === true &&
+                    p.cursus_ids.includes(cursus_user.cursus_id)
+                ).length
+              : null,
           }}
         />
       )

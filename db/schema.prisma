@@ -43,9 +43,10 @@ model User {
   ftSchoolVerified Boolean @default(false)
   extended42Data   Json?
 
-  isDisplayEmail Boolean @default(true)
-  isDisplayName  Boolean @default(true)
-  isDisplayPhoto Boolean @default(false)
+  isDisplayEmail        Boolean @default(true)
+  isDisplayName         Boolean @default(true)
+  isDisplayPhoto        Boolean @default(false)
+  isDisplayProjectCount Boolean @default(true)
 }
 
 model VerificationToken {

@@ -36,11 +36,12 @@ I forked the project, brought it back to life with a full dependency upgrade, re
 ## ✨ Features
 
 - 🎴 **Stats card** — login, campus, cursus, grade, level progress bar
-- 🎨 **Coalition theming** — card color matches your coalition (or piscine theme)
+- 🎨 **Design themes** — coalition colors + 5 custom themes (Midnight, Carbon, Rose, Neon) and a Gold theme unlocked at level 21
 - 🕳️ **BlackHole countdown** — days remaining, or student/piscine period dates
 - 🏆 **Project score badges** — individual badge for each project (pass/fail/score)
 - 📸 **Profile photo** — optional circular avatar on the card
-- ⚙️ **Display options** — toggle name, email, and photo visibility (stored server-side)
+- 📊 **Validated project count** — shows how many projects you've validated in the selected cursus
+- ⚙️ **Display options** — toggle name, email, photo, and project count visibility (stored server-side)
 - 🔄 **Auto-refresh** — 42 data syncs every 12 hours
 
 ## 🤓 Usage
