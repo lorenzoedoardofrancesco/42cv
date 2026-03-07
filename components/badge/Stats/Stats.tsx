@@ -23,10 +23,12 @@ export type StatsProps = {
 };
 
 const GOLDEN_COLOR = "#C8A400";
+const CARBON_COLOR = "#C0C8D8";
 
 const Stats = ({ data }: StatsProps) => {
   const isLevel21 = data.color === GOLDEN_COLOR;
-  const effectiveColor = isLevel21 ? GOLDEN_COLOR : data.color;
+  const isCarbon = data.color === CARBON_COLOR;
+  const effectiveColor = data.color;
 
   const infoRows = [
     data.name && ["Name", data.name],
@@ -47,13 +49,14 @@ const Stats = ({ data }: StatsProps) => {
   const avatarCy = infoCenterY - 3;
 
   return (
-    <Container height={height} color={effectiveColor} isLevel21={isLevel21}>
+    <Container height={height} color={effectiveColor} isLevel21={isLevel21} isCarbon={isCarbon}>
       <Header
         color={effectiveColor}
         campus={data.campus}
         cursus={data.cursus}
         login={data.login}
         isLevel21={isLevel21}
+        isCarbon={isCarbon}
       />
       {data.profileImage && (
         <g className="fadeIn" style={{ animationDelay: "0.5s" }}>

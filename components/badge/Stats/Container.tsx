@@ -5,6 +5,7 @@ export type ContainerProps = {
   color: string;
   height: number;
   isLevel21?: boolean;
+  isCarbon?: boolean;
 };
 
 const Container: React.FC<PropsWithChildren<ContainerProps>> = ({
@@ -12,6 +13,7 @@ const Container: React.FC<PropsWithChildren<ContainerProps>> = ({
   color,
   height,
   isLevel21 = false,
+  isCarbon = false,
 }) => {
   return (
     <svg
@@ -58,6 +60,24 @@ const Container: React.FC<PropsWithChildren<ContainerProps>> = ({
               <stop offset="35%" stopColor="#E8C100" stopOpacity="0.80" />
               <stop offset="65%" stopColor="#C8A400" stopOpacity="0.70" />
               <stop offset="100%" stopColor="#8B6914" stopOpacity="0.50" />
+            </linearGradient>
+          </>
+        ) : isCarbon ? (
+          <>
+            <linearGradient id="card_bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#050505" />
+              <stop offset="100%" stopColor="#000000" />
+            </linearGradient>
+            <linearGradient id="card_sheen" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.04" />
+              <stop offset="40%" stopColor="#ffffff" stopOpacity="0.01" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.00" />
+            </linearGradient>
+            <linearGradient id="border_grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.70" />
+              <stop offset="35%" stopColor="#C0C8D8" stopOpacity="0.55" />
+              <stop offset="65%" stopColor="#8090A8" stopOpacity="0.40" />
+              <stop offset="100%" stopColor="#404858" stopOpacity="0.25" />
             </linearGradient>
           </>
         ) : (

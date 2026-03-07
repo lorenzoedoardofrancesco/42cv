@@ -6,11 +6,12 @@ export type HeaderProps = {
   campus: string;
   cursus: string;
   isLevel21?: boolean;
+  isCarbon?: boolean;
 };
 
 const UNDEFINED_COLOR = "#e0e0e0";
 
-const Header = ({ color, login, campus, cursus, isLevel21 = false }: HeaderProps) => {
+const Header = ({ color, login, campus, cursus, isLevel21 = false, isCarbon = false }: HeaderProps) => {
   const isDefault = color === UNDEFINED_COLOR;
   const logoFill = isDefault ? "white" : color;
   const logoGradientId = "logo_chrome";
@@ -102,14 +103,14 @@ const Header = ({ color, login, campus, cursus, isLevel21 = false }: HeaderProps
         )}
         <path
           d="M442 38.7359H457.473V46.4891H465.194V32.4781H449.748L465.194 17H457.473L442 32.4781V38.7359Z"
-          fill={isLevel21 ? logoFill : isDefault ? `url(#${logoGradientId})` : logoFill}
+          fill={isLevel21 || isCarbon ? logoFill : isDefault ? `url(#${logoGradientId})` : logoFill}
         />
-        <path d="M468.527 24.7484L476.252 17H468.527V24.7484Z" fill={isLevel21 ? logoFill : isDefault ? `url(#${logoGradientId})` : logoFill} />
+        <path d="M468.527 24.7484L476.252 17H468.527V24.7484Z" fill={isLevel21 || isCarbon ? logoFill : isDefault ? `url(#${logoGradientId})` : logoFill} />
         <path
           d="M476.252 24.7484L468.527 32.4781V40.2031H476.252V32.4781L484 24.7484V17H476.252V24.7484Z"
-          fill={isLevel21 ? logoFill : isDefault ? `url(#${logoGradientId})` : logoFill}
+          fill={isLevel21 || isCarbon ? logoFill : isDefault ? `url(#${logoGradientId})` : logoFill}
         />
-        <path d="M484 32.4781L476.252 40.2031H484V32.4781Z" fill={isLevel21 ? logoFill : isDefault ? `url(#${logoGradientId})` : logoFill} />
+        <path d="M484 32.4781L476.252 40.2031H484V32.4781Z" fill={isLevel21 || isCarbon ? logoFill : isDefault ? `url(#${logoGradientId})` : logoFill} />
       </g>
     </>
   );
