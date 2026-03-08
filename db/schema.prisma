@@ -55,6 +55,10 @@ model User {
   address                     String?
   phone                       String?
   defaultDarkMode             Boolean @default(false)
+  isDisplayCampusCohortRank   Boolean @default(false)
+  isDisplayCohortRank         Boolean @default(false)
+  isDisplayAllTimeRank        Boolean @default(false)
+  bio                         String?
 }
 
 model ProjectDescription {
@@ -70,6 +74,32 @@ model TeamStat {
   totalEvals       Int      @default(0)
   outstandingCount Int      @default(0)
   checkedAt        DateTime @default(now())
+}
+
+model BlockedLoginsCache {
+  id        Int      @id @default(1) // singleton row
+  logins    String[] @default([])
+  updatedAt DateTime @updatedAt
+}
+
+model RankingCache {
+  login             String   @id
+  level             Float?
+  poolYear          String?
+  campusId          Int?
+  allTimeRank       Int?
+  allTimeTotal      Int?
+  cohortRank        Int?
+  cohortTotal       Int?
+  campusCohortRank  Int?
+  campusCohortTotal Int?
+  checkedAt         DateTime @default(now())
+}
+
+model CronCheckpoint {
+  key     String   @id
+  data    Json
+  savedAt DateTime @updatedAt
 }
 
 model VerificationToken {

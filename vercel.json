@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/sync-project-descriptions",
       "schedule": "0 0 * * 0"
+    },
+    {
+      "path": "/api/cron/sync-rankings",
+      "schedule": "0 1 * * 0"
     }
   ]
 }

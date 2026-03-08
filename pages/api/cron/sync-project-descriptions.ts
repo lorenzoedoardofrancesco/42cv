@@ -93,8 +93,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (!cached) {
         const description = await fetchWithRetry(slug);
-        await (prisma as any).projectDescription.create({
-          data: { slug, description, checkedAt: new Date() },
+        await (prisma as any).projectDescription.upsert({
+          where: { slug },
+          update: { description, checkedAt: new Date() },
+          create: { slug, description, checkedAt: new Date() },
         });
         created++;
       } else {

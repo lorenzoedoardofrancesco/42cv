@@ -266,6 +266,10 @@ const Home = () => {
   const [address, setAddress] = useState<string>((data as any).address ?? "");
   const [phone, setPhone] = useState<string>((data as any).phone ?? "");
   const [defaultDarkMode, setDefaultDarkMode] = useState<boolean>((data as any).defaultDarkMode ?? false);
+  const [isDisplayCampusCohortRank, setIsDisplayCampusCohortRank] = useState<boolean>((data as any).isDisplayCampusCohortRank ?? false);
+  const [isDisplayCohortRank, setIsDisplayCohortRank] = useState<boolean>((data as any).isDisplayCohortRank ?? false);
+  const [isDisplayAllTimeRank, setIsDisplayAllTimeRank] = useState<boolean>((data as any).isDisplayAllTimeRank ?? false);
+  const [bio, setBio] = useState<string>((data as any).bio ?? "");
 
   const coalition = useMemo(
     () => getCoalitions(coalitionId, data.extended42Data.coalitions),
@@ -384,6 +388,46 @@ const Home = () => {
                   />
                 </button>
               </label>
+              {/* Rankings */}
+              <div>
+                <p className="text-sm text-neutral-200 mb-1">Rankings</p>
+                <p className="text-xs text-neutral-500 mb-3">Show your rank on your public profile. Computed weekly from the full 42 network via the 42 API.</p>
+                <div className="space-y-3">
+                  {([
+                    { key: "isDisplayCampusCohortRank" as const, label: "Campus cohort rank", desc: `Your rank among ${primaryCampus?.name ?? "your campus"} students who joined in the same pool year.`, value: isDisplayCampusCohortRank, set: setIsDisplayCampusCohortRank },
+                    { key: "isDisplayCohortRank" as const, label: "Cohort rank", desc: "Your rank among all 42 students who joined in the same pool year.", value: isDisplayCohortRank, set: setIsDisplayCohortRank },
+                    { key: "isDisplayAllTimeRank" as const, label: "All-time rank", desc: "Your rank among all 42 students.", value: isDisplayAllTimeRank, set: setIsDisplayAllTimeRank },
+                  ] as const).map(({ key, label, desc, value, set }) => (
+                    <label key={key} className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm text-neutral-200">{label}</p>
+                        <p className="text-xs text-neutral-500 mt-0.5">{desc}</p>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          const next = !value;
+                          set(next);
+                          await axios.patch("/api/v2/me", {
+                            isDisplayEmail: isDisplayEmail ? "true" : "false",
+                            isDisplayName: isDisplayName ? "true" : "false",
+                            [key]: next ? "true" : "false",
+                          });
+                        }}
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                          value ? "bg-green-600" : "bg-neutral-700"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            value ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* Default theme */}
               <label className="flex items-center justify-between gap-4">
                 <div>
@@ -450,6 +494,28 @@ const Home = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Bio */}
+              <div>
+                <p className="text-sm text-neutral-200 mb-1">Bio</p>
+                <p className="text-xs text-neutral-500 mb-3">A short summary shown at the top of your CV. 2&ndash;3 sentences about who you are and what you&apos;re looking for.</p>
+                <textarea
+                  value={bio}
+                  placeholder="e.g. Software engineer passionate about systems programming and open source. Looking for a backend role in a fast-paced environment."
+                  onChange={(e) => setBio(e.target.value)}
+                  onBlur={async () => {
+                    await axios.patch("/api/v2/me", {
+                      isDisplayEmail: isDisplayEmail ? "true" : "false",
+                      isDisplayName: isDisplayName ? "true" : "false",
+                      bio,
+                    });
+                  }}
+                  rows={3}
+                  maxLength={400}
+                  className="w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600 resize-none"
+                />
+                <p className="text-xs text-neutral-600 text-right mt-1">{bio.length}/400</p>
               </div>
 
               {/* Achievements selection */}

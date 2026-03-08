@@ -59,6 +59,13 @@ type PublicProfile = {
   linkedinUrl: string | null;
   address: string | null;
   phone: string | null;
+  bio: string | null;
+};
+
+type Rankings = {
+  campusCohort?: { rank: number; total: number };
+  cohort?: { rank: number; total: number };
+  allTime?: { rank: number; total: number };
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -156,6 +163,7 @@ function StatPill({
   sub,
   accent,
   t,
+  tooltip,
 }: {
   label: string;
   shortLabel?: string;
@@ -163,27 +171,37 @@ function StatPill({
   sub: string;
   accent: string;
   t: ReturnType<typeof tokens>;
+  tooltip?: string;
 }) {
   return (
     <div
-      className="flex-1 basis-0 min-w-0 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border overflow-hidden"
+      className={`relative min-w-0 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border overflow-visible ${tooltip ? "group cursor-help" : ""}`}
       style={{ backgroundColor: t.cardBg, borderColor: t.cardBorder, boxShadow: t.cardShadow }}
     >
       <div
-        className="text-[10px] sm:text-xs uppercase tracking-widest mb-1 truncate"
+        className="text-[9px] sm:text-xs uppercase tracking-wide sm:tracking-widest mb-1 truncate"
         style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}
       >
         <span className="sm:hidden">{shortLabel ?? label}</span>
         <span className="hidden sm:inline">{label}</span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="text-lg sm:text-2xl font-bold leading-none" style={{ color: accent, fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 700 }}>
+        <span className="text-base sm:text-2xl font-bold leading-none" style={{ color: accent, fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 700 }}>
           {value}
         </span>
-        <span className="text-xs sm:text-sm" style={{ color: t.textMuted }}>
+        <span className="text-[10px] sm:text-sm" style={{ color: t.textMuted }}>
           {sub}
         </span>
       </div>
+      {tooltip && (
+        <span
+          className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 rounded-lg text-xs leading-snug pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-center z-20"
+          style={{ backgroundColor: "#1f2328", color: "#e6edf3", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 300 }}
+        >
+          {tooltip}
+          <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1f2328" }} />
+        </span>
+      )}
     </div>
   );
 }
@@ -440,6 +458,7 @@ export default function CVPage({
   uncachedTeamIds,
   showOutstandingVotes,
   defaultDarkMode,
+  rankings,
 }: {
   profile: PublicProfile;
   initialDescriptions: Record<string, string | null>;
@@ -448,6 +467,7 @@ export default function CVPage({
   uncachedTeamIds: number[];
   showOutstandingVotes: boolean;
   defaultDarkMode: boolean;
+  rankings: Rankings | null;
 }) {
   const [dark, setDark] = useState(defaultDarkMode);
   const t = tokens(dark);
@@ -522,6 +542,17 @@ export default function CVPage({
   const skills = [...(activeCursus?.skills ?? [])]
     .sort((a, b) => b.level - a.level)
     .slice(0, 16);
+
+  const outstandingTotal = validatedProjects.reduce((sum, p) => {
+    const stat = p.teamId ? teamStats[p.teamId] : null;
+    return sum + (stat?.outstandingCount ?? 0);
+  }, 0);
+
+  const [lvlBarWidth, setLvlBarWidth] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => setLvlBarWidth(lvlPct), 120);
+    return () => clearTimeout(timer);
+  }, [lvlPct]);
 
   const title = `${profile.displayname ?? profile.login} — 42 Profile`;
 
@@ -637,24 +668,16 @@ export default function CVPage({
                       <span className="relative group cursor-help text-sm font-medium" style={{ color: t.textSub }}>
                         {activeCursus.grade}
                         <span
-                          className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 rounded-lg text-[11px] leading-snug pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-center z-20"
+                          className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 rounded-lg text-xs leading-snug pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-center z-20"
                           style={{ backgroundColor: "#1f2328", color: "#e6edf3", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 300 }}
                         >
                           {{
                             "Transcender": "Successfully passed the 42 Network Common Core",
-                            "Member":      "Active student in the 42 Network curriculum",
-                            "Learner":     "Currently enrolled in the 42 Network program",
+                            "Member":      "Currently studying at 42, a tuition-free coding school with no teachers — students learn by doing projects and reviewing each other's work",
+                            "Learner":     "Currently enrolled at 42, a tuition-free coding school with no teachers — students learn by doing projects and reviewing each other's work",
                           }[activeCursus.grade] ?? `42 Network academic grade`}
                           <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1f2328" }} />
                         </span>
-                      </span>
-                    </>
-                  )}
-                  {activeCursus?.cursus.name && (
-                    <>
-                      <span style={{ color: t.cardBorder }}>|</span>
-                      <span className="text-sm" style={{ color: t.textMuted }}>
-                        {activeCursus.cursus.name}
                       </span>
                     </>
                   )}
@@ -707,35 +730,142 @@ export default function CVPage({
               </div>
             </div>
 
-            {/* Stat strip + level bar */}
-            <div className="flex flex-wrap items-end gap-3 mt-6">
-              <StatPill label="Level" value={`${lvlInt}`} sub={`${lvlPct}%`} accent={accent} t={t} />
-              <StatPill label="Projects" value={`${validatedProjects.length}`} sub="validated" accent={accent} t={t} />
+            {/* Bio */}
+            {profile.bio && (
+              <div className="mt-4 pl-3" style={{ borderLeft: `2px solid ${accent}` }}>
+                {profile.bio.split("\n").map((line, i) => (
+                  <p key={i} className="text-sm leading-relaxed italic" style={{ color: t.textSub, fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 300, marginTop: i > 0 ? "0.5em" : 0 }}>
+                    {line || <br />}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {/* Stat strip — 6 items on desktop, 3+3 on mobile */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mt-6">
+              {/* Student since — year big, month small */}
               {activeCursus?.begin_at && (
+                <div
+                  className="rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border min-w-0"
+                  style={{ backgroundColor: t.cardBg, borderColor: t.cardBorder, boxShadow: t.cardShadow }}
+                >
+                  <div className="text-[10px] sm:text-xs uppercase tracking-widest mb-1 truncate" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>
+                    <span className="sm:hidden">Student since</span>
+                    <span className="hidden sm:inline">Student since</span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-lg sm:text-2xl font-bold leading-none" style={{ color: accent, fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 700 }}>
+                      {new Date(activeCursus.begin_at).getFullYear()}
+                    </span>
+                    <span className="text-xs sm:text-sm" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>
+                      {new Date(activeCursus.begin_at).toLocaleDateString("en", { month: "short" })}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Projects */}
+              <div
+                className="rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border min-w-0"
+                style={{ backgroundColor: t.cardBg, borderColor: t.cardBorder, boxShadow: t.cardShadow }}
+              >
+                <div className="text-[10px] sm:text-xs uppercase tracking-widest mb-1 truncate" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>
+                  Projects
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-lg sm:text-2xl font-bold leading-none" style={{ color: accent, fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 700 }}>
+                    {validatedProjects.length}
+                  </span>
+                  <span className="text-xs sm:text-sm" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>
+                    validated
+                  </span>
+                </div>
+              </div>
+
+              {/* Outstanding counter — only if enabled and any exist */}
+              {showOutstandingVotes && outstandingTotal > 0 && (
+                <div
+                  className="relative group rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border min-w-0 cursor-help"
+                  style={{ backgroundColor: t.cardBg, borderColor: t.cardBorder, boxShadow: t.cardShadow }}
+                >
+                  <div className="text-[9px] sm:text-xs uppercase tracking-wide sm:tracking-widest mb-1 truncate" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>
+                    Outstanding
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-base sm:text-2xl font-bold leading-none" style={{ color: "#eab308", fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 700 }}>
+                      {outstandingTotal}
+                    </span>
+                    <span className="text-[10px] sm:text-sm" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>
+                      votes
+                    </span>
+                  </div>
+                  <span
+                    className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 rounded-lg text-xs leading-snug pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-center z-20"
+                    style={{ backgroundColor: "#1f2328", color: "#e6edf3", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 300 }}
+                  >
+                    At 42, all projects are reviewed by fellow students. This is how many times peers gave this student the highest possible rating
+                    <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1f2328" }} />
+                  </span>
+                </div>
+              )}
+
+              {/* Campus Year Rank */}
+              {rankings?.campusCohort && (
                 <StatPill
-                  label="Student since"
-                  shortLabel="Since"
-                  value={new Date(activeCursus.begin_at).toLocaleDateString("en", { month: "short" })}
-                  sub={new Date(activeCursus.begin_at).toLocaleDateString("en", { year: "numeric" })}
+                  label={`${profile.campus} ${profile.poolYear} rank`}
+                  shortLabel={`${profile.campus} ${profile.poolYear} rank`}
+                  value={`#${rankings.campusCohort.rank}`}
+                  sub={`/ ${rankings.campusCohort.total}`}
                   accent={accent}
                   t={t}
+                  tooltip={`#${rankings.campusCohort.rank} out of ${rankings.campusCohort.total} students at ${profile.campus} who started in ${profile.poolYear}, ranked by level`}
+                />
+              )}
+
+              {/* Year Rank */}
+              {rankings?.cohort && (
+                <StatPill
+                  label={`${profile.poolYear} rank`}
+                  shortLabel={`${profile.poolYear} rank`}
+                  value={`#${rankings.cohort.rank}`}
+                  sub={`/ ${rankings.cohort.total}`}
+                  accent={accent}
+                  t={t}
+                  tooltip={`#${rankings.cohort.rank} out of ${rankings.cohort.total} students who started at any 42 campus worldwide in ${profile.poolYear}, ranked by level`}
+                />
+              )}
+
+              {/* All-Time Rank */}
+              {rankings?.allTime && (
+                <StatPill
+                  label="All-time rank"
+                  shortLabel="All-time rank"
+                  value={`#${rankings.allTime.rank}`}
+                  sub={`/ ${rankings.allTime.total}`}
+                  accent={accent}
+                  t={t}
+                  tooltip={`#${rankings.allTime.rank} out of ${rankings.allTime.total} active students across all 42 campuses worldwide, ranked by level`}
                 />
               )}
             </div>
 
-            {/* Level bar */}
-            <div className="mt-3">
-              <div className="flex flex-col justify-end pl-1">
-                <div className="flex justify-between text-xs mb-1" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 300 }}>
-                  <span style={{ color: accent }}>lvl {lvlInt}</span>
-                  <span>{lvlPct}% → {lvlInt + 1}</span>
-                </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: t.hrColor }}>
+            {/* Level card — full width, below the stat cards */}
+            <div
+              className="mt-3 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border"
+              style={{ backgroundColor: t.cardBg, borderColor: t.cardBorder, boxShadow: t.cardShadow }}
+            >
+              <div className="text-center text-base mb-2" style={{ color: t.textSub, fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 500 }}>
+                level {lvlInt} - {lvlPct}%
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold tabular-nums shrink-0" style={{ color: accent, fontFamily: "'HelveticaNeue', sans-serif", minWidth: "1.5rem", textAlign: "right" }}>{lvlInt}</span>
+                <div className="relative flex-1 h-[7px] rounded-full overflow-hidden" style={{ backgroundColor: t.hrColor }}>
                   <div
                     className="h-full rounded-full transition-all duration-1000"
-                    style={{ width: `${lvlPct}%`, backgroundColor: accent }}
+                    style={{ width: `${lvlBarWidth}%`, background: `linear-gradient(90deg, ${accent}99, ${accent})` }}
                   />
                 </div>
+                <span className="text-sm tabular-nums shrink-0" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif", minWidth: "1.5rem" }}>{lvlInt + 1}</span>
               </div>
             </div>
           </div>
@@ -1133,6 +1263,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       linkedinUrl: (user as any).linkedinUrl ?? null,
       address: (user as any).address ?? null,
       phone: (user as any).phone ?? null,
+      bio: (user as any).bio ?? null,
       achievements: (() => {
         const selectedIds: number[] = (user as any).selectedAchievementIds ?? [];
         if (selectedIds.length === 0) return [];
@@ -1184,7 +1315,33 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 
     const showOutstandingVotes = (user as any).isDisplayOutstandingVotes ?? true;
     const defaultDarkMode = (user as any).defaultDarkMode ?? false;
-    return { props: { profile, initialDescriptions, correctionNumbers, teamStats: statMap, uncachedTeamIds, showOutstandingVotes, defaultDarkMode } };
+
+    // Rankings — read from weekly cache, only expose enabled flags
+    const showAllTimeRank = (user as any).isDisplayAllTimeRank ?? false;
+    const showCohortRank = (user as any).isDisplayCohortRank ?? false;
+    const showCampusCohortRank = (user as any).isDisplayCampusCohortRank ?? false;
+
+    let rankings: Rankings | null = null;
+    if (showAllTimeRank || showCohortRank || showCampusCohortRank) {
+      const cached = await (prisma as any).rankingCache.findUnique({
+        where: { login: profile.login },
+      });
+      if (cached) {
+        rankings = {
+          ...(showAllTimeRank && cached.allTimeRank != null && {
+            allTime: { rank: cached.allTimeRank, total: cached.allTimeTotal },
+          }),
+          ...(showCohortRank && cached.cohortRank != null && {
+            cohort: { rank: cached.cohortRank, total: cached.cohortTotal },
+          }),
+          ...(showCampusCohortRank && cached.campusCohortRank != null && {
+            campusCohort: { rank: cached.campusCohortRank, total: cached.campusCohortTotal },
+          }),
+        };
+      }
+    }
+
+    return { props: { profile, initialDescriptions, correctionNumbers, teamStats: statMap, uncachedTeamIds, showOutstandingVotes, defaultDarkMode, rankings } };
   } catch (e) {
     console.error(e);
     return { notFound: true };

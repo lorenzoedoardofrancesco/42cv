@@ -5,9 +5,9 @@ import NodeCache from "node-cache";
 export const END_POINT_42API = "https://api.intra.42.fr";
 
 const apiCache = new NodeCache();
-const queue = new PQueue({
+export const queue = new PQueue({
   interval: 1000,
-  intervalCap: process.env.NODE_ENV === "production" ? 6 : 2,
+  intervalCap: process.env.NODE_ENV === "production" ? 6 : 6,
 });
 
 export const axiosClientFor42 = axios.create({
@@ -49,7 +49,16 @@ axiosClientFor42.interceptors.response.use(
   },
   async function (error) {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 429) {
+      const retries = originalRequest._retryCount ?? 0;
+      if (retries < 5) {
+        originalRequest._retryCount = retries + 1;
+        const retryAfter = parseInt(error.response.headers["retry-after"] ?? "2", 10);
+        await new Promise((r) => setTimeout(r, retryAfter * 1000));
+        return axios(originalRequest);
+      }
+    }
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const { data: token } = await get42OauthToken();
       if (token) {
