@@ -18,7 +18,6 @@ import Icon from "./Icon";
 
 const ICONSWIDTH = 300;
 const PADDING = 50;
-const LEFT_PADDING = 50;
 
 interface Props {
   data: ProjectUser;
@@ -39,28 +38,43 @@ const ProjectScore: React.FC<Props> = ({ data }) => {
         : "#D8636F"
       : "#00BABC";
 
-  const width =
-    LEFT_PADDING +
+  // Fixed width: match the widest case ("success 125/100") for all badges
+  const refWidth =
     ICONSWIDTH +
     PADDING * 2 +
+    calculateStringWidth("success", 120) +
+    calculateStringWidth("125", 200) +
+    calculateStringWidth("/100", 80);
+
+  const fixedWidth = refWidth + PADDING * 2; // extra padding on both sides
+
+  // Calculate actual content width for centering
+  const hasScore = data["validated?"] != null;
+  const contentWidth =
+    ICONSWIDTH +
+    PADDING +
     calculateStringWidth(type, 120) +
-    (data["validated?"] != null &&
-      calculateStringWidth(data.final_mark.toString(), 200) +
-        calculateStringWidth("/100", 80));
+    (hasScore
+      ? PADDING +
+        calculateStringWidth(data.final_mark.toString(), 200) +
+        calculateStringWidth("/100", 80)
+      : 0);
+
+  const offsetX = (fixedWidth - contentWidth) / 2;
 
   return (
     <svg
-      width={(width / 10).toFixed(0)}
+      width={(fixedWidth / 10).toFixed(0)}
       height="28"
-      viewBox={`0 0 ${width} 280`}
+      viewBox={`0 0 ${fixedWidth} 280`}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
         <style dangerouslySetInnerHTML={{ __html: fontFaceStyle }} />
       </defs>
-      <rect width={width} height="280" rx="1" fill={color} />
-      <g transform={`translate(${LEFT_PADDING}, 0)`}>
+      <rect width={fixedWidth} height="280" rx="1" fill={color} />
+      <g transform={`translate(${offsetX}, 0)`}>
         <Icon type={type} />
       </g>
       <g
@@ -70,7 +84,7 @@ const ProjectScore: React.FC<Props> = ({ data }) => {
         fontSize="150"
       >
         <text
-          x={LEFT_PADDING + ICONSWIDTH}
+          x={offsetX + ICONSWIDTH}
           y="200"
           textLength={calculateStringWidth(type, 120)}
           data-testid={"type"}
@@ -78,7 +92,7 @@ const ProjectScore: React.FC<Props> = ({ data }) => {
           {type}
         </text>
       </g>
-      {data["validated?"] != null && (
+      {hasScore && (
         <>
           <g
             fill="#fff"
@@ -87,7 +101,7 @@ const ProjectScore: React.FC<Props> = ({ data }) => {
             fontSize="200"
           >
             <text
-              x={LEFT_PADDING + ICONSWIDTH + calculateStringWidth(type, 120) + PADDING}
+              x={offsetX + ICONSWIDTH + calculateStringWidth(type, 120) + PADDING}
               y="210"
               textLength={calculateStringWidth(data.final_mark.toString(), 200)}
               data-testid={"final_mark"}
@@ -103,7 +117,7 @@ const ProjectScore: React.FC<Props> = ({ data }) => {
           >
             <text
               x={
-                LEFT_PADDING +
+                offsetX +
                 ICONSWIDTH +
                 calculateStringWidth(type, 120) +
                 PADDING +
