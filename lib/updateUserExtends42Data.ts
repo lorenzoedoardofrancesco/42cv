@@ -22,6 +22,7 @@ const getUser = async (where: { id: string } | { email: string }) =>
     where,
     include: {
       accounts: true,
+      projectGithubLinks: true,
     },
   });
 

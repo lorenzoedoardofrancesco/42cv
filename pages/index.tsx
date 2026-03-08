@@ -270,6 +270,13 @@ const Home = () => {
   const [isDisplayCohortRank, setIsDisplayCohortRank] = useState<boolean>((data as any).isDisplayCohortRank ?? false);
   const [isDisplayAllTimeRank, setIsDisplayAllTimeRank] = useState<boolean>((data as any).isDisplayAllTimeRank ?? false);
   const [bio, setBio] = useState<string>((data as any).bio ?? "");
+  const [projectGithubLinks, setProjectGithubLinks] = useState<Record<string, string>>(() => {
+    const links: Record<string, string> = {};
+    for (const link of ((data as any).projectGithubLinks ?? []) as { projectSlug: string; githubUrl: string }[]) {
+      links[link.projectSlug] = link.githubUrl;
+    }
+    return links;
+  });
 
   const coalition = useMemo(
     () => getCoalitions(coalitionId, data.extended42Data.coalitions),
@@ -360,70 +367,56 @@ const Home = () => {
           </label>
           {isPublicProfile && (
             <>
-              <label className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm text-neutral-200">Show outstanding votes</p>
-                  <p className="text-xs text-neutral-500 mt-0.5">
-                    Display star ratings on your validated projects.
-                  </p>
-                </div>
-                <button
-                  onClick={async () => {
-                    const next = !isDisplayOutstandingVotes;
-                    setIsDisplayOutstandingVotes(next);
+              {/* Bio */}
+              <div>
+                <p className="text-sm text-neutral-200 mb-1">Bio</p>
+                <p className="text-xs text-neutral-500 mb-3">A short summary shown at the top of your CV. 2&ndash;3 sentences about who you are and what you&apos;re looking for.</p>
+                <textarea
+                  value={bio}
+                  placeholder="e.g. Software engineer passionate about systems programming and open source. Looking for a backend role in a fast-paced environment."
+                  onChange={(e) => setBio(e.target.value)}
+                  onBlur={async () => {
                     await axios.patch("/api/v2/me", {
                       isDisplayEmail: isDisplayEmail ? "true" : "false",
                       isDisplayName: isDisplayName ? "true" : "false",
-                      isDisplayOutstandingVotes: next ? "true" : "false",
+                      bio,
                     });
                   }}
-                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-                    isDisplayOutstandingVotes ? "bg-green-600" : "bg-neutral-700"
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      isDisplayOutstandingVotes ? "translate-x-6" : "translate-x-1"
-                    }`}
-                  />
-                </button>
-              </label>
-              {/* Rankings */}
+                  rows={3}
+                  maxLength={400}
+                  className="w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600 resize-none"
+                />
+                <p className="text-xs text-neutral-600 text-right mt-1">{bio.length}/400</p>
+              </div>
+
+              {/* Contact links */}
               <div>
-                <p className="text-sm text-neutral-200 mb-1">Rankings</p>
-                <p className="text-xs text-neutral-500 mb-3">Show your rank on your public profile. Computed weekly from the full 42 network via the 42 API.</p>
-                <div className="space-y-3">
+                <p className="text-sm text-neutral-200 mb-1">Contact & Links</p>
+                <p className="text-xs text-neutral-500 mb-3">Shown in the CV page header.</p>
+                <div className="space-y-2">
                   {([
-                    { key: "isDisplayCampusCohortRank" as const, label: "Campus cohort rank", desc: `Your rank among ${primaryCampus?.name ?? "your campus"} students who joined in the same pool year.`, value: isDisplayCampusCohortRank, set: setIsDisplayCampusCohortRank },
-                    { key: "isDisplayCohortRank" as const, label: "Cohort rank", desc: "Your rank among all 42 students who joined in the same pool year.", value: isDisplayCohortRank, set: setIsDisplayCohortRank },
-                    { key: "isDisplayAllTimeRank" as const, label: "All-time rank", desc: "Your rank among all 42 students.", value: isDisplayAllTimeRank, set: setIsDisplayAllTimeRank },
-                  ] as const).map(({ key, label, desc, value, set }) => (
-                    <label key={key} className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-sm text-neutral-200">{label}</p>
-                        <p className="text-xs text-neutral-500 mt-0.5">{desc}</p>
-                      </div>
-                      <button
-                        onClick={async () => {
-                          const next = !value;
-                          set(next);
+                    { label: "GitHub URL", value: githubUrl, set: setGithubUrl, key: "githubUrl", placeholder: "https://github.com/username" },
+                    { label: "LinkedIn URL", value: linkedinUrl, set: setLinkedinUrl, key: "linkedinUrl", placeholder: "https://linkedin.com/in/username" },
+                    { label: "Address", value: address, set: setAddress, key: "address", placeholder: "City, Country" },
+                    { label: "Phone", value: phone, set: setPhone, key: "phone", placeholder: "+41 79 000 00 00" },
+                  ] as const).map(({ label, value, set, key, placeholder }) => (
+                    <div key={key} className="flex items-center gap-3">
+                      <span className="text-xs text-neutral-400 w-24 shrink-0">{label}</span>
+                      <input
+                        type="text"
+                        value={value}
+                        placeholder={placeholder}
+                        onChange={(e) => set(e.target.value)}
+                        onBlur={async () => {
                           await axios.patch("/api/v2/me", {
                             isDisplayEmail: isDisplayEmail ? "true" : "false",
                             isDisplayName: isDisplayName ? "true" : "false",
-                            [key]: next ? "true" : "false",
+                            [key]: value,
                           });
                         }}
-                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-                          value ? "bg-green-600" : "bg-neutral-700"
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            value ? "translate-x-6" : "translate-x-1"
-                          }`}
-                        />
-                      </button>
-                    </label>
+                        className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -464,58 +457,113 @@ const Home = () => {
                 </div>
               </label>
 
-              {/* Contact links */}
+              {/* Rankings */}
               <div>
-                <p className="text-sm text-neutral-200 mb-1">Contact & Links</p>
-                <p className="text-xs text-neutral-500 mb-3">Shown in the CV page header.</p>
-                <div className="space-y-2">
+                <p className="text-sm text-neutral-200 mb-1">Rankings</p>
+                <p className="text-xs text-neutral-500 mb-3">Show your rank on your public profile. Computed weekly from the full 42 network via the 42 API.</p>
+                <div className="space-y-3">
                   {([
-                    { label: "GitHub URL", value: githubUrl, set: setGithubUrl, key: "githubUrl", placeholder: "https://github.com/username" },
-                    { label: "LinkedIn URL", value: linkedinUrl, set: setLinkedinUrl, key: "linkedinUrl", placeholder: "https://linkedin.com/in/username" },
-                    { label: "Address", value: address, set: setAddress, key: "address", placeholder: "City, Country" },
-                    { label: "Phone", value: phone, set: setPhone, key: "phone", placeholder: "+41 79 000 00 00" },
-                  ] as const).map(({ label, value, set, key, placeholder }) => (
-                    <div key={key} className="flex items-center gap-3">
-                      <span className="text-xs text-neutral-400 w-24 shrink-0">{label}</span>
-                      <input
-                        type="text"
-                        value={value}
-                        placeholder={placeholder}
-                        onChange={(e) => set(e.target.value)}
-                        onBlur={async () => {
+                    { key: "isDisplayCampusCohortRank" as const, label: "Campus cohort rank", desc: `Your rank among ${primaryCampus?.name ?? "your campus"} students who joined in the same pool year.`, value: isDisplayCampusCohortRank, set: setIsDisplayCampusCohortRank },
+                    { key: "isDisplayCohortRank" as const, label: "Cohort rank", desc: "Your rank among all 42 students who joined in the same pool year.", value: isDisplayCohortRank, set: setIsDisplayCohortRank },
+                    { key: "isDisplayAllTimeRank" as const, label: "All-time rank", desc: "Your rank among all 42 students.", value: isDisplayAllTimeRank, set: setIsDisplayAllTimeRank },
+                  ] as const).map(({ key, label, desc, value, set }) => (
+                    <label key={key} className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm text-neutral-200">{label}</p>
+                        <p className="text-xs text-neutral-500 mt-0.5">{desc}</p>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          const next = !value;
+                          set(next);
                           await axios.patch("/api/v2/me", {
                             isDisplayEmail: isDisplayEmail ? "true" : "false",
                             isDisplayName: isDisplayName ? "true" : "false",
-                            [key]: value,
+                            [key]: next ? "true" : "false",
                           });
                         }}
-                        className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
-                      />
-                    </div>
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                          value ? "bg-green-600" : "bg-neutral-700"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            value ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </label>
                   ))}
                 </div>
               </div>
 
-              {/* Bio */}
-              <div>
-                <p className="text-sm text-neutral-200 mb-1">Bio</p>
-                <p className="text-xs text-neutral-500 mb-3">A short summary shown at the top of your CV. 2&ndash;3 sentences about who you are and what you&apos;re looking for.</p>
-                <textarea
-                  value={bio}
-                  placeholder="e.g. Software engineer passionate about systems programming and open source. Looking for a backend role in a fast-paced environment."
-                  onChange={(e) => setBio(e.target.value)}
-                  onBlur={async () => {
+              <label className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-neutral-200">Show outstanding votes</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Display star ratings on your validated projects.
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    const next = !isDisplayOutstandingVotes;
+                    setIsDisplayOutstandingVotes(next);
                     await axios.patch("/api/v2/me", {
                       isDisplayEmail: isDisplayEmail ? "true" : "false",
                       isDisplayName: isDisplayName ? "true" : "false",
-                      bio,
+                      isDisplayOutstandingVotes: next ? "true" : "false",
                     });
                   }}
-                  rows={3}
-                  maxLength={400}
-                  className="w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600 resize-none"
-                />
-                <p className="text-xs text-neutral-600 text-right mt-1">{bio.length}/400</p>
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                    isDisplayOutstandingVotes ? "bg-green-600" : "bg-neutral-700"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isDisplayOutstandingVotes ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </label>
+
+              {/* Project GitHub links */}
+              <div>
+                <p className="text-sm text-neutral-200 mb-1">Project GitHub Links</p>
+                <p className="text-xs text-neutral-500 mb-3">Optionally link each project to its GitHub repo. Recruiters will see a clickable GitHub icon on your CV.</p>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  {projectList.map((project) => {
+                    const slug = project.project.slug;
+                    const currentUrl = projectGithubLinks[slug] ?? "";
+                    return (
+                      <div key={project.id} className="flex items-center gap-3">
+                        <span className="text-xs text-neutral-400 w-36 shrink-0 truncate" title={project.project.name}>{project.project.name}</span>
+                        <input
+                          type="text"
+                          value={currentUrl}
+                          placeholder="https://github.com/user/repo"
+                          onChange={(e) => {
+                            setProjectGithubLinks((prev) => ({ ...prev, [slug]: e.target.value }));
+                          }}
+                          onBlur={async () => {
+                            const val = currentUrl.trim();
+                            if (val) {
+                              await axios.put("/api/v2/project-github-links", { projectSlug: slug, githubUrl: val });
+                              setProjectGithubLinks((prev) => ({ ...prev, [slug]: val }));
+                            } else {
+                              await axios.delete("/api/v2/project-github-links", { data: { projectSlug: slug } });
+                              setProjectGithubLinks((prev) => {
+                                const next = { ...prev };
+                                delete next[slug];
+                                return next;
+                              });
+                            }
+                          }}
+                          className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Achievements selection */}
