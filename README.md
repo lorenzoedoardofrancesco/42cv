@@ -1,9 +1,12 @@
 <div align="center">
   <img src="/public/42cv_logo.svg" height="128px" alt="42cv.dev logo">
-  <h1>42cv.dev</h1>
-  <p>A recruiter-ready CV and dynamically generated badges for 42 students.</p>
+  <h1><a href="https://42cv.dev">42cv.dev</a></h1>
+  <p>🚀 Your 42 journey, recruiter-ready. Instant CV page and dynamic stats badges for 🎓 École 42 students. Just sign in!</p>
   <a href="https://github.com/lorenzoedoardofrancesco/42cv/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" /></a>
   <a href="https://42cv.dev"><img src="https://img.shields.io/badge/deployed%20on-Vercel-black.svg?logo=vercel" alt="Deployed on Vercel" /></a>
+  <img src="https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/Next.js-black?logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
 </div>
 
 ## ✨ Features

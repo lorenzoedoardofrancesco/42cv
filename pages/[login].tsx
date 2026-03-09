@@ -63,6 +63,12 @@ type PublicProfile = {
   projectGithubLinks: Record<string, string>;
 };
 
+const ordinal = (n: number) => {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0]);
+};
+
 type Rankings = {
   campusCohort?: { rank: number; total: number };
   cohort?: { rank: number; total: number };
@@ -815,11 +821,11 @@ export default function CVPage({
                 <StatPill
                   label={`${profile.campus} ${profile.poolYear} rank`}
                   shortLabel={`${profile.campus} ${profile.poolYear} rank`}
-                  value={`#${rankings.campusCohort.rank}`}
+                  value={ordinal(rankings.campusCohort.rank)}
                   sub={`/ ${rankings.campusCohort.total}`}
                   accent={accent}
                   t={t}
-                  tooltip={`#${rankings.campusCohort.rank} out of ${rankings.campusCohort.total} students at ${profile.campus} who started in ${profile.poolYear}, ranked by level`}
+                  tooltip={`${ordinal(rankings.campusCohort.rank)} out of ${rankings.campusCohort.total} students at ${profile.campus} who started in ${profile.poolYear}, ranked by level`}
                 />
               )}
 
@@ -828,11 +834,11 @@ export default function CVPage({
                 <StatPill
                   label={`${profile.poolYear} rank`}
                   shortLabel={`${profile.poolYear} rank`}
-                  value={`#${rankings.cohort.rank}`}
+                  value={ordinal(rankings.cohort.rank)}
                   sub={`/ ${rankings.cohort.total}`}
                   accent={accent}
                   t={t}
-                  tooltip={`#${rankings.cohort.rank} out of ${rankings.cohort.total} students who started at any 42 campus worldwide in ${profile.poolYear}, ranked by level`}
+                  tooltip={`${ordinal(rankings.cohort.rank)} out of ${rankings.cohort.total} students who started at any 42 campus worldwide in ${profile.poolYear}, ranked by level`}
                 />
               )}
 
@@ -841,11 +847,11 @@ export default function CVPage({
                 <StatPill
                   label="All-time rank"
                   shortLabel="All-time rank"
-                  value={`#${rankings.allTime.rank}`}
+                  value={ordinal(rankings.allTime.rank)}
                   sub={`/ ${rankings.allTime.total}`}
                   accent={accent}
                   t={t}
-                  tooltip={`#${rankings.allTime.rank} out of ${rankings.allTime.total} active students across all 42 campuses worldwide, ranked by level`}
+                  tooltip={`${ordinal(rankings.allTime.rank)} out of ${rankings.allTime.total} active students across all 42 campuses worldwide, ranked by level`}
                 />
               )}
             </div>
