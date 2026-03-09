@@ -709,13 +709,13 @@ const Home = () => {
           <label>
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Markdown</span>
             <Code
-              code={`[![${data.extended42Data.login}'s 42 stats](${statsUrl})](https://42cv.dev)`}
+              code={`[![${data.extended42Data.login}'s 42 stats](${statsUrl})](${isPublicProfile ? `https://42cv.dev/${data.extended42Data.login}` : "https://42cv.dev"})`}
             />
           </label>
           <label>
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">HTML</span>
             <Code
-              code={`<a href="https://42cv.dev"><img src="${statsUrl}" alt="${data.extended42Data.login}'s 42 stats" /></a>`}
+              code={`<a href="${isPublicProfile ? `https://42cv.dev/${data.extended42Data.login}` : "https://42cv.dev"}"><img src="${statsUrl}" alt="${data.extended42Data.login}'s 42 stats" /></a>`}
             />
           </label>
         </div>
