@@ -1,5 +1,5 @@
 {
-  "projectName": "42badge",
+  "projectName": "42cv",
   "projectOwner": "lorenzoedoardofrancesco",
   "repoType": "github",
   "repoHost": "https://github.com",
@@ -18,7 +18,9 @@
       "contributions": [
         "code",
         "maintenance",
-        "infra"
+        "infra",
+        "design",
+        "ideas"
       ]
     },
     {

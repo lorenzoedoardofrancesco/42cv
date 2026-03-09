@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../db";
 import { axiosClientFor42 } from "../../../lib/api/42api";
 
-const TEAM_CACHE_TTL = 12 * 60 * 60 * 1000; // 12 hours — outstanding count can change
+const TEAM_CACHE_TTL = 12 * 60 * 60 * 1000; // 12 hours - outstanding count can change
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -51,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           create: { teamId, totalEvals, outstandingCount },
         });
       } catch {
-        // skip — stars just won't show for this one
+        // skip - stars just won't show for this one
       }
     })
   );

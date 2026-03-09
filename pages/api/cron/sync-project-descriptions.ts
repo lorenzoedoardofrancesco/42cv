@@ -108,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         if (fresh === null) {
-          // Keep existing — just update checkedAt
+          // Keep existing - just update checkedAt
           await (prisma as any).projectDescription.update({
             where: { slug },
             data: { checkedAt: new Date() },

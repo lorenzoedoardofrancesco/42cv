@@ -56,7 +56,7 @@ const NewUserPage = () => {
         <h2 className="text-lg font-semibold text-red-500">Danger Zone</h2>
         <div className="p-4 bg-red-950/20 border border-red-900/50 rounded-lg space-y-3">
           <p className="text-sm text-neutral-400">
-            Removes your account from the 42Badge database. Your badge URL will stop working and your cached 42 data will be deleted. Your 42 intra account is not affected.
+            Removes your account from the 42cv.dev database. Your badge URL will stop working and your cached 42 data will be deleted. Your 42 intra account is not affected.
           </p>
           <DeleteUser />
         </div>

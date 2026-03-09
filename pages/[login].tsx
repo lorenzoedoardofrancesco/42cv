@@ -137,7 +137,7 @@ function tokens(dark: boolean) {
         textSub: "#8b949e",
         textMuted: "#484f58",
         hrColor: "#21262d",
-        accent: "#c9d1d9", // light grey — readable on dark
+        accent: "#c9d1d9", // light grey - readable on dark
         tierColors: TIER_COLORS_DARK,
       }
     : {
@@ -149,7 +149,7 @@ function tokens(dark: boolean) {
         textSub: "#656d76",
         textMuted: "#9198a1",
         hrColor: "#d8dee4",
-        accent: "#2c3e50", // anthracite — typographic, refined
+        accent: "#2c3e50", // anthracite - typographic, refined
         tierColors: TIER_COLORS,
       };
 }
@@ -555,7 +555,7 @@ export default function CVPage({
     return () => clearTimeout(timer);
   }, [lvlPct]);
 
-  const title = `${profile.displayname ?? profile.login} — 42 Profile`;
+  const title = `${profile.displayname ?? profile.login} - 42 Profile`;
 
   return (
     <>
@@ -563,7 +563,7 @@ export default function CVPage({
         <title>{title}</title>
         <meta
           name="description"
-          content={`42 student at ${profile.campus} — level ${lvlInt}, ${validatedProjects.length} validated projects.`}
+          content={`42 student at ${profile.campus} - level ${lvlInt}, ${validatedProjects.length} validated projects.`}
         />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={`Level ${lvlInt} · ${activeCursus?.grade ?? "Student"} · ${profile.campus}`} />
@@ -674,8 +674,8 @@ export default function CVPage({
                         >
                           {{
                             "Transcender": "Successfully passed the 42 Network Common Core",
-                            "Member":      "Currently studying at 42, a tuition-free coding school with no teachers — students learn by doing projects and reviewing each other's work",
-                            "Learner":     "Currently enrolled at 42, a tuition-free coding school with no teachers — students learn by doing projects and reviewing each other's work",
+                            "Member":      "Currently studying at 42, a tuition-free coding school with no teachers - students learn by doing projects and reviewing each other's work",
+                            "Learner":     "Currently enrolled at 42, a tuition-free coding school with no teachers - students learn by doing projects and reviewing each other's work",
                           }[activeCursus.grade] ?? `42 Network academic grade`}
                           <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1f2328" }} />
                         </span>
@@ -684,7 +684,7 @@ export default function CVPage({
                   )}
                 </div>
 
-                {/* Row 2: contact — only if any contact info exists */}
+                {/* Row 2: contact - only if any contact info exists */}
                 {(profile.email || profile.phone || profile.address || profile.githubUrl || profile.linkedinUrl) && (
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
                     {profile.email && (
@@ -742,9 +742,9 @@ export default function CVPage({
               </div>
             )}
 
-            {/* Stat strip — 6 items on desktop, 3+3 on mobile */}
+            {/* Stat strip - 6 items on desktop, 3+3 on mobile */}
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mt-6">
-              {/* Student since — year big, month small */}
+              {/* Student since - year big, month small */}
               {activeCursus?.begin_at && (
                 <div
                   className="rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border min-w-0"
@@ -783,7 +783,7 @@ export default function CVPage({
                 </div>
               </div>
 
-              {/* Outstanding counter — only if enabled and any exist */}
+              {/* Outstanding counter - only if enabled and any exist */}
               {showOutstandingVotes && outstandingTotal > 0 && (
                 <div
                   className="relative group rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border min-w-0 cursor-help"
@@ -850,7 +850,7 @@ export default function CVPage({
               )}
             </div>
 
-            {/* Level card — full width, below the stat cards */}
+            {/* Level card - full width, below the stat cards */}
             <div
               className="mt-3 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border"
               style={{ backgroundColor: t.cardBg, borderColor: t.cardBorder, boxShadow: t.cardShadow }}
@@ -979,7 +979,7 @@ export default function CVPage({
                 className="text-xs transition-colors"
                 style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 300 }}
               >
-                powered by 42Badge
+                powered by 42cv.dev
               </Link>
             </div>
           </aside>
@@ -1074,7 +1074,7 @@ export default function CVPage({
                                       fontWeight: 700,
                                     }}
                                   >
-                                    {project.finalMark ?? "—"}
+                                    {project.finalMark ?? "-"}
                                   </span>
                                 </div>
 
@@ -1293,7 +1293,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       correctionNumbers[row.slug] = row.correctionNumber ?? null;
     }
 
-    // Load team stats from DB cache only (fast) — uncached ones fetched client-side
+    // Load team stats from DB cache only (fast) - uncached ones fetched client-side
     const validatedTeamIds = (data.projects_users ?? [])
       .filter((p: any) => p["validated?"] && !p.project.parent_id && p.current_team_id)
       .map((p: any) => p.current_team_id as number);
@@ -1319,7 +1319,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const showOutstandingVotes = (user as any).isDisplayOutstandingVotes ?? true;
     const defaultDarkMode = (user as any).defaultDarkMode ?? false;
 
-    // Rankings — read from weekly cache, only expose enabled flags
+    // Rankings - read from weekly cache, only expose enabled flags
     const showAllTimeRank = (user as any).isDisplayAllTimeRank ?? false;
     const showCohortRank = (user as any).isDisplayCohortRank ?? false;
     const showCampusCohortRank = (user as any).isDisplayCampusCohortRank ?? false;

@@ -66,7 +66,7 @@ const Header = ({ color, login, campus, cursus, isLevel21 = false, isCarbon = fa
           </tspan>
         </text>
       </g>
-      {/* 42 logo top-right — chrome shine */}
+      {/* 42 logo top-right - chrome shine */}
       <defs>
         <linearGradient id={logoGradientId}
           gradientUnits="userSpaceOnUse" x1="0" y1="17" x2="0" y2="49">

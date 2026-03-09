@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import Head from "next/head";
 import Layout from "../components/Layout";
 import Stats, { StatsProps } from "../components/badge/Stats";
 import Code from "../components/Code";
@@ -182,7 +183,7 @@ const FeedbackForm = ({ login }: { login: string }) => {
     const issueBody = encodeURIComponent(`**Submitted by:** @${login}\n\n${body.trim()}`);
     const label = labelMap[type] ?? "question";
     window.open(
-      `https://github.com/lorenzoedoardofrancesco/42badge/issues/new?title=${issueTitle}&body=${issueBody}&labels=${label}`,
+      `https://github.com/lorenzoedoardofrancesco/42cv/issues/new?title=${issueTitle}&body=${issueBody}&labels=${label}`,
       "_blank"
     );
   };
@@ -292,8 +293,8 @@ const Home = () => {
     }
   }, [selectedCursus, data.extended42Data.coalitions.length]);
 
-  const statsUrl = `https://42badge.vercel.app/api/v2/${data.id}/stats?cursusId=${cursusId}&coalitionId=${coalitionId}`;
-  const projectUrl = `https://42badge.vercel.app/api/v2/${data.id}/project`;
+  const statsUrl = `https://42cv.dev/api/badge/${data.id}/stats?cursusId=${cursusId}&coalitionId=${coalitionId}`;
+  const projectUrl = `https://42cv.dev/api/badge/${data.id}/project`;
 
   const projectList = useMemo(
     () =>
@@ -323,17 +324,20 @@ const Home = () => {
 
   return (
     <Layout>
+      <Head>
+        <title>42cv.dev</title>
+      </Head>
       {/* 42CV Hero + Section */}
       <section className="space-y-4">
         <div className="text-center pt-4">
           <div className="flex items-center justify-center gap-3">
-            <h1 className="text-4xl font-bold tracking-tight text-white">42CV</h1>
+            <h1 className="text-4xl font-bold tracking-tight text-white">42cv</h1>
             <span className="px-2 py-0.5 text-xs font-bold tracking-widest uppercase rounded-full bg-green-500/20 text-green-400 border border-green-500/40 animate-pulse">
               New
             </span>
           </div>
           <p className="mt-2 text-neutral-500">
-            A recruiter-friendly CV page — shareable in one link.
+            A recruiter-friendly CV page - shareable in one link.
           </p>
         </div>
         <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-lg space-y-4">
@@ -341,7 +345,7 @@ const Home = () => {
             <div>
               <p className="text-sm text-neutral-200">Make profile public</p>
               <p className="text-xs text-neutral-500 mt-0.5">
-                Anyone with the link can view your profile — no login required.
+                Anyone with the link can view your profile - no login required.
               </p>
             </div>
             <button
@@ -607,7 +611,7 @@ const Home = () => {
 
               <div>
                 <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Your CV link</span>
-                <Code code={`https://42cv.vercel.app/${data.extended42Data.login}`} />
+                <Code code={`https://42cv.dev/${data.extended42Data.login}`} />
               </div>
             </>
           )}
@@ -619,7 +623,7 @@ const Home = () => {
       {/* Stats Card Section */}
       <section className="space-y-4">
         <div className="text-center pt-4">
-          <h2 className="text-4xl font-bold tracking-tight text-white">42Badge</h2>
+          <h2 className="text-4xl font-bold tracking-tight text-white">42cv Badge</h2>
           <p className="mt-2 text-neutral-500">
             Dynamically generated badges for your git readmes.
           </p>
@@ -705,13 +709,13 @@ const Home = () => {
           <label>
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Markdown</span>
             <Code
-              code={`[![${data.extended42Data.login}'s 42 stats](${statsUrl})](https://42badge.vercel.app)`}
+              code={`[![${data.extended42Data.login}'s 42 stats](${statsUrl})](https://42cv.dev)`}
             />
           </label>
           <label>
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">HTML</span>
             <Code
-              code={`<a href="https://42badge.vercel.app"><img src="${statsUrl}" alt="${data.extended42Data.login}'s 42 stats" /></a>`}
+              code={`<a href="https://42cv.dev"><img src="${statsUrl}" alt="${data.extended42Data.login}'s 42 stats" /></a>`}
             />
           </label>
         </div>
@@ -765,7 +769,7 @@ const Home = () => {
         <div className="text-center pt-4">
           <h2 className="text-4xl font-bold tracking-tight text-white">Feedback</h2>
           <p className="mt-2 text-neutral-500">
-            Found a bug or have an idea? Submit it directly as a GitHub issue — takes 10 seconds.
+            Found a bug or have an idea? Submit it directly as a GitHub issue - takes 10 seconds.
           </p>
         </div>
         <FeedbackForm login={data.extended42Data.login} />

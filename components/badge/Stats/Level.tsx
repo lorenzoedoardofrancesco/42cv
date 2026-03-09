@@ -100,7 +100,7 @@ const Level = ({ color, level, height, isLevel21 = false }: LevelProps) => {
         x="25" y={barY} width="445" height={barH} rx="17"
         fill="url(#bar_gloss)"
       />
-      {/* Level text — light layer (visible over dark bg) */}
+      {/* Level text - light layer (visible over dark bg) */}
       <text
         fill="#d0d0d0"
         xmlSpace="preserve"
@@ -116,7 +116,7 @@ const Level = ({ color, level, height, isLevel21 = false }: LevelProps) => {
           level {level_integer} - {level_percentage}%
         </tspan>
       </text>
-      {/* Level text — dark layer (clipped to filled bar area) */}
+      {/* Level text - dark layer (clipped to filled bar area) */}
       <text
         fill="#1a1a1a"
         clipPath="url(#bar_fill_clip)"

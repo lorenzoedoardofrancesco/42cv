@@ -1,7 +1,8 @@
 import type { NextPage } from "next";
+import Head from "next/head";
 import LoginButton42School from "../../components/LoginButton42School";
 import { signIn } from "next-auth/react";
-import _42BadgeLogo from "../../components/42BadgeLogo";
+import _42CvLogo from "../../components/42CvLogo";
 import { useContext, useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import Link from "next/link";
@@ -61,9 +62,12 @@ const SignInPage: NextPage = () => {
 
   return (
     <Layout>
+      <Head>
+        <title>42cv.dev</title>
+      </Head>
       <div className="flex flex-col gap-4 items-center pt-8">
         <Link href={"/"}>
-          <_42BadgeLogo className="w-32 h-32 fill-white" />
+          <_42CvLogo className="w-32 h-32 fill-white" />
         </Link>
         <h1 className="text-2xl font-bold text-white">Sign In</h1>
         <hr className="border-neutral-800 w-full" />

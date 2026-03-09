@@ -130,7 +130,7 @@ const Container: React.FC<PropsWithChildren<ContainerProps>> = ({
         {/* Outer glow */}
         <rect x="5" y="5" width="485" height={height} rx="10"
           fill={color} fillOpacity="0.12" filter="url(#card_glow)" />
-        {/* Card background — luxury dark gradient */}
+        {/* Card background - luxury dark gradient */}
         <rect x="5" y="5" width="485" height={height} rx="10" fill="url(#card_bg)" />
         {/* Color tint */}
         <rect x="5" y="5" width="485" height={height} rx="10" fill={color} fillOpacity="0.04" />

@@ -119,7 +119,7 @@ const BlackHole = ({ data, color }: BlackHoleProps) => {
       />
     );
 
-  // Has blackhole — show days remaining
+  // Has blackhole - show days remaining
   if (data.blackholed_at) {
     return (
       <InfoBox
@@ -133,7 +133,7 @@ const BlackHole = ({ data, color }: BlackHoleProps) => {
     );
   }
 
-  // Has end date — show period
+  // Has end date - show period
   if (endDate) {
     return (
       <InfoBox
@@ -144,7 +144,7 @@ const BlackHole = ({ data, color }: BlackHoleProps) => {
     );
   }
 
-  // No end date — still active
+  // No end date - still active
   return (
     <InfoBox
       titleColor={color}

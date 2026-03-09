@@ -58,7 +58,7 @@ async function clearCheckpoint() {
   } catch {}
 }
 
-// 42 API group IDs — same as The-Official-New-Leets
+// 42 API group IDs - same as The-Official-New-Leets
 const TEST_ACCOUNT_GROUP = 119;
 const STAFF_GROUP = 1;
 const BLOCKED_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -213,7 +213,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 1. Blocked logins (DB-cached monthly)
     const blocked = await getBlockedLogins();
 
-    // 2. Global fetch — all-time + cohort rankings for every student
+    // 2. Global fetch - all-time + cohort rankings for every student
     const allTimeRankMap = new Map<string, { rank: number; total: number }>();
     const cohortRankMap = new Map<string, { rank: number; total: number }>();
 
@@ -238,8 +238,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
     }
 
-    // 3. Per-campus fetch — campus-cohort
-    //    Only fetch campuses where a badge42 user is enrolled
+    // 3. Per-campus fetch - campus-cohort
+    //    Only fetch campuses where a 42cv user is enrolled
     const campusCohortRankMap = new Map<string, { rank: number; total: number }>(
       Object.entries(cp.campusCohortRankMap)
     );
