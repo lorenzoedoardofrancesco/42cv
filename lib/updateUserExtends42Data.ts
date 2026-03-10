@@ -40,16 +40,12 @@ export const updateUserExtends42Data: (
   const accounts = collection.keyBy(user.accounts, "provider");
   if (!accounts["42-school"]) return user;
 
-  // if (process.env.NODE_ENV === "production") {
-  const ExpiresDate = new Date();
-  ExpiresDate.setSeconds(ExpiresDate.getSeconds() + EXPIRE_TIME);
   if (
     user.extended42Data &&
     (new Date(user.extended42Data.anonymize_date).valueOf() <= Date.now() ||
       user.extended42Data.synced_at + EXPIRE_TIME * 1000 > Date.now())
   ) {
     return user;
-    // }
   }
   const ftSchoolAccountId = accounts["42-school"].providerAccountId;
 

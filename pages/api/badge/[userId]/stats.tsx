@@ -7,18 +7,9 @@ import getCoalitions from "../../../../lib/getCoalitions";
 import {
   updateUserExtends42Data,
   UserNotFound,
+  EXPIRE_TIME,
 } from "../../../../lib/updateUserExtends42Data";
-
-// 12hour
-const EXPIRE_TIME = 12 * 60 * 60;
-
-class FTAccountNotLinked extends Error {
-  constructor() {
-    super();
-    this.name = "FTAccountNotLinked";
-    this.message = "42School Account Not Linked";
-  }
-}
+import { FTAccountNotLinked } from "../../../../lib/errors";
 
 const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

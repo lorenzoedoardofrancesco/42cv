@@ -2,23 +2,12 @@ import collection from "lodash-es/collection";
 import type { NextApiRequest, NextApiResponse } from "next";
 import ReactDomServer from "react-dom/server";
 import ProjectScore from "../../../../../components/badge/ProjectScore";
-import { getBase64ImageFromUrl } from "../../../../../lib/getBase64ImageFromUrl";
-import getCoalitions from "../../../../../lib/getCoalitions";
 import {
   updateUserExtends42Data,
   UserNotFound,
+  EXPIRE_TIME,
 } from "../../../../../lib/updateUserExtends42Data";
-
-// 12hour
-const EXPIRE_TIME = 12 * 60 * 60;
-
-class FTAccountNotLinked extends Error {
-  constructor() {
-    super();
-    this.name = "FTAccountNotLinked";
-    this.message = "42School Account Not Linked";
-  }
-}
+import { FTAccountNotLinked } from "../../../../../lib/errors";
 
 const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

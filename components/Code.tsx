@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiCheck, FiCopy } from "react-icons/fi";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { useEffect } from "react";
 
 export type CodeProps = {
   code: string;
