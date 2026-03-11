@@ -589,6 +589,9 @@ export default function CVPage({
     return () => clearTimeout(timer);
   }, [lvlPct]);
 
+  const [cellTooltip, setCellTooltip] = useState<{ date: string; names: string[]; x: number; y: number } | null>(null);
+  const [heatmapYearIdx, setHeatmapYearIdx] = useState(0);
+
   const title = `${profile.displayname ?? profile.login} - 42 Profile`;
 
   return (
@@ -641,48 +644,34 @@ export default function CVPage({
         >
           <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-3 relative">
             {/* Top-right actions */}
-            <div className="absolute top-5 sm:top-8 right-4 sm:right-6 z-10 flex items-center gap-2 no-print">
-            {hasOverview && (
-              <div className="flex rounded-lg border overflow-hidden shrink-0" style={{ borderColor: t.cardBorder }}>
-                {(["overview", "full"] as const).map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setView(v)}
-                    className="flex items-center gap-1 px-2 py-1.5 sm:px-3 text-xs font-medium transition-colors capitalize"
-                    style={{
-                      backgroundColor: view === v ? accent : t.bg,
-                      color: view === v ? (dark ? "#0d1117" : "#ffffff") : t.textSub,
-                    }}
-                  >
-                    {v === "overview" ? "Overview" : "Full"}
-                  </button>
-                ))}
+            <div className="absolute top-5 sm:top-8 right-4 sm:right-6 z-10 flex flex-col items-end gap-2 no-print">
+              {/* Row 1: PDF + theme */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const prev = skillView;
+                    setSkillView("bars");
+                    setTimeout(() => { window.print(); setSkillView(prev); }, 50);
+                  }}
+                  className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md border text-xs font-medium transition-colors"
+                  style={{ borderColor: t.cardBorder, backgroundColor: t.bg, color: t.textSub }}
+                  title="Print / Save as PDF"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  <span className="hidden sm:inline">PDF</span>
+                </button>
+                <button
+                  onClick={toggleTheme}
+                  className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md border text-xs font-medium transition-colors"
+                  style={{ borderColor: t.cardBorder, backgroundColor: t.bg, color: t.textSub }}
+                >
+                  {dark ? (
+                    <><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-5a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V3a1 1 0 0 1 1-1zm0 16a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1zm8.66-10a1 1 0 0 1-.5 1.73l-1.73 1a1 1 0 0 1-1-1.73l1.73-1a1 1 0 0 1 1.5.99zM5.57 17.27a1 1 0 0 1-.5 1.73l-1.73 1a1 1 0 1 1-1-1.73l1.73-1a1 1 0 0 1 1.5-.99zM21 12a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1zM5 12a1 1 0 0 1-1 1H2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1zm14.43 5.27l1.73 1a1 1 0 1 1-1 1.73l-1.73-1a1 1 0 0 1 1-1.73zM4.57 5.27l-1.73-1a1 1 0 0 1 1-1.73l1.73 1a1 1 0 0 1-1 1.73z" /></svg><span className="hidden sm:inline">Light</span></>
+                  ) : (
+                    <><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" /></svg><span className="hidden sm:inline">Dark</span></>
+                  )}
+                </button>
               </div>
-            )}
-            <button
-              onClick={() => {
-                const prev = skillView;
-                setSkillView("bars");
-                setTimeout(() => { window.print(); setSkillView(prev); }, 50);
-              }}
-              className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md border text-xs font-medium transition-colors"
-              style={{ borderColor: t.cardBorder, backgroundColor: t.bg, color: t.textSub }}
-              title="Print / Save as PDF"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              <span className="hidden sm:inline">PDF</span>
-            </button>
-            <button
-              onClick={toggleTheme}
-              className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md border text-xs font-medium transition-colors"
-              style={{ borderColor: t.cardBorder, backgroundColor: t.bg, color: t.textSub }}
-            >
-              {dark ? (
-                <><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-5a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V3a1 1 0 0 1 1-1zm0 16a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1zm8.66-10a1 1 0 0 1-.5 1.73l-1.73 1a1 1 0 0 1-1-1.73l1.73-1a1 1 0 0 1 1.5.99zM5.57 17.27a1 1 0 0 1-.5 1.73l-1.73 1a1 1 0 1 1-1-1.73l1.73-1a1 1 0 0 1 1.5-.99zM21 12a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1zM5 12a1 1 0 0 1-1 1H2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1zm14.43 5.27l1.73 1a1 1 0 1 1-1 1.73l-1.73-1a1 1 0 0 1 1-1.73zM4.57 5.27l-1.73-1a1 1 0 0 1 1-1.73l1.73 1a1 1 0 0 1-1 1.73z" /></svg><span className="hidden sm:inline">Light</span></>
-              ) : (
-                <><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" /></svg><span className="hidden sm:inline">Dark</span></>
-              )}
-            </button>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-end">
@@ -905,9 +894,31 @@ export default function CVPage({
                   tooltip={`${ordinal(rankings.allTime.rank)} out of ${rankings.allTime.total} active students across all 42 campuses worldwide, ranked by level`}
                 />
               )}
+
+              {/* Level card - shown when no rankings to fill the empty space */}
+              {!rankings?.campusCohort && !rankings?.cohort && !rankings?.allTime && (
+                <div
+                  className={`relative group cursor-help col-span-1 ${!(showOutstandingVotes && outstandingTotal > 0) ? "sm:col-span-4" : "sm:col-span-3"} rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 border min-w-0 overflow-visible`}
+                  style={{ backgroundColor: t.cardBg, borderColor: t.cardBorder, boxShadow: t.cardShadow }}
+                >
+                  <div className="text-[10px] sm:text-xs uppercase tracking-widest mb-1" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>Level</div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg sm:text-2xl font-bold leading-none shrink-0" style={{ color: accent, fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 700 }}>{lvlInt}</span>
+                    <div className="relative flex-1 h-[3px] rounded-full overflow-hidden" style={{ backgroundColor: t.hrColor }}>
+                      <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${lvlBarWidth}%`, background: `linear-gradient(90deg, ${accent}99, ${accent})` }} />
+                    </div>
+                    <span className="text-xs tabular-nums shrink-0" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>{lvlPct}%</span>
+                  </div>
+                  <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 px-3 py-2 rounded-lg text-xs leading-snug pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-center z-20" style={{ backgroundColor: "#1f2328", color: "#e6edf3", boxShadow: "0 4px 16px rgba(0,0,0,0.3)", fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 300 }}>
+                    École 42 progression level. Reflects overall mastery across all completed projects and skills.
+                    <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1f2328" }} />
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Level bar - inline, compact */}
+            {/* Level bar - only shown when rankings are visible (otherwise level card is in the grid) */}
+            {(rankings?.campusCohort || rankings?.cohort || rankings?.allTime) && (
             <div className="relative group cursor-help mt-3 py-2.5 flex items-center gap-3">
               <span className="text-xs uppercase tracking-widest shrink-0" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>Level <span className="font-bold" style={{ color: accent }}>{lvlInt}</span></span>
               <div className="relative flex-1 h-[3px] rounded-full overflow-hidden" style={{ backgroundColor: t.hrColor }}>
@@ -919,8 +930,38 @@ export default function CVPage({
                 <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1f2328" }} />
               </span>
             </div>
+            )}
             </div>
           </div>
+
+          {/* Tab bar */}
+          {hasOverview && (
+            <div className="no-print max-w-6xl mx-auto px-4 sm:px-6 pt-3 pb-0 flex gap-1">
+              <button
+                onClick={() => setView("overview")}
+                className="px-4 py-2 text-xs font-medium rounded-t-lg border-b-2 transition-colors"
+                style={{
+                  borderBottomColor: view === "overview" ? accent : "transparent",
+                  color: view === "overview" ? accent : t.textMuted,
+                  fontFamily: "'HelveticaNeue', sans-serif",
+                }}
+              >
+                Resume
+              </button>
+              <button
+                onClick={() => setView("full")}
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-t-lg border-b-2 transition-colors"
+                style={{
+                  borderBottomColor: view === "full" ? accent : "transparent",
+                  color: view === "full" ? accent : t.textMuted,
+                  fontFamily: "'HelveticaNeue', sans-serif",
+                }}
+              >
+                <Si42 size={10} color={view === "full" ? accent : t.textMuted} />
+                Journey
+              </button>
+            </div>
+          )}
 
         </header>
 
@@ -1243,6 +1284,187 @@ export default function CVPage({
           </section>
           </div>
           ) : (
+          <div className="space-y-8">
+
+          {/* ── ACTIVITY HEATMAP ──────────────────────────────────────── */}
+          <FadeIn delay={80}>
+          {(() => {
+            const fmtKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+
+            // Build day → { count, names }
+            const dayMap: Record<string, { count: number; names: string[] }> = {};
+            for (const p of validatedProjects) {
+              if (!p.markedAt) continue;
+              const key = fmtKey(new Date(p.markedAt));
+              if (!dayMap[key]) dayMap[key] = { count: 0, names: [] };
+              dayMap[key].count++;
+              dayMap[key].names.push(p.name);
+            }
+
+            const today = new Date(); today.setHours(0,0,0,0);
+            const maxCount = Math.max(...Object.values(dayMap).map(d => d.count), 1);
+            const getColor = (count: number) => {
+              if (count === 0) return t.hrColor;
+              const i = Math.min(count / maxCount, 1);
+              if (i < 0.25) return `${accent}55`;
+              if (i < 0.5)  return `${accent}88`;
+              if (i < 0.75) return `${accent}bb`;
+              return accent;
+            };
+
+            // Get all years with projects, sorted descending
+            const years = [...new Set(validatedProjects.filter(p => p.markedAt).map(p => new Date(p.markedAt!).getFullYear()))].sort((a,b) => b-a);
+            if (years.length === 0) return null;
+
+            const buildYearGrid = (year: number) => {
+              const jan1 = new Date(year, 0, 1);
+              const offset = jan1.getDay(); // 0=Sun
+              const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+              const daysInYear = isLeap ? 366 : 365;
+              const weeks: ({ date: Date; key: string; data: typeof dayMap[string] | null } | null)[][] = [];
+              let week: ({ date: Date; key: string; data: typeof dayMap[string] | null } | null)[] = [];
+              // pad start
+              for (let i = 0; i < offset; i++) week.push(null);
+              for (let d = 0; d < daysInYear; d++) {
+                const date = new Date(year, 0, d + 1);
+                const key = fmtKey(date);
+                week.push({ date, key, data: dayMap[key] ?? null });
+                if (week.length === 7) { weeks.push(week); week = []; }
+              }
+              if (week.length) { while (week.length < 7) week.push(null); weeks.push(week); }
+
+              // Month labels: find first week column where month changes
+              const monthCols: { month: string; wi: number }[] = [];
+              let lastMonth = -1;
+              weeks.forEach((w, wi) => {
+                const firstReal = w.find(c => c !== null);
+                if (firstReal) {
+                  const m = firstReal.date.getMonth();
+                  if (m !== lastMonth) { monthCols.push({ month: firstReal.date.toLocaleDateString("en", { month: "short" }), wi }); lastMonth = m; }
+                }
+              });
+
+              const yearTotal = Object.entries(dayMap).filter(([k]) => k.startsWith(`${year}-`)).reduce((s,[,v]) => s + v.count, 0);
+              return { weeks, monthCols, yearTotal };
+            };
+
+            const yearIdx = Math.min(heatmapYearIdx, years.length - 1);
+            const year = years[yearIdx];
+            const { weeks, monthCols, yearTotal } = buildYearGrid(year);
+
+            return (
+              <div
+                className="rounded-xl border p-5 sm:p-6"
+                style={{ backgroundColor: t.cardBg, borderColor: t.cardBorder, boxShadow: t.cardShadow }}
+                onTouchStart={(e) => { const x = e.touches[0].clientX; (e.currentTarget as any)._touchX = x; }}
+                onTouchEnd={(e) => {
+                  const startX = (e.currentTarget as any)._touchX;
+                  if (startX == null) return;
+                  const dx = e.changedTouches[0].clientX - startX;
+                  if (Math.abs(dx) < 40) return;
+                  if (dx < 0 && yearIdx < years.length - 1) setHeatmapYearIdx(yearIdx + 1);
+                  if (dx > 0 && yearIdx > 0) setHeatmapYearIdx(yearIdx - 1);
+                }}
+              >
+                {/* Header */}
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xs font-bold uppercase tracking-widest flex items-center gap-1.5" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>
+                      <Si42 size={11} color={t.textMuted} /> Project Activity
+                    </h2>
+                    <span className="text-xs" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif" }}>
+                      <span className="font-semibold" style={{ color: t.textSub }}>{yearTotal}</span> project{yearTotal !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setHeatmapYearIdx(i => Math.min(i + 1, years.length - 1))}
+                      disabled={yearIdx >= years.length - 1}
+                      className="w-6 h-6 flex items-center justify-center rounded transition-colors disabled:opacity-30"
+                      style={{ color: t.textMuted }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <span className="text-sm font-bold tabular-nums" style={{ color: t.textSub, fontFamily: "'HelveticaNeue', sans-serif", minWidth: 36, textAlign: "center" }}>{year}</span>
+                    <button
+                      onClick={() => setHeatmapYearIdx(i => Math.max(i - 1, 0))}
+                      disabled={yearIdx <= 0}
+                      className="w-6 h-6 flex items-center justify-center rounded transition-colors disabled:opacity-30"
+                      style={{ color: t.textMuted }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                  </div>
+                </div>
+                {/* Grid */}
+                <div className="overflow-x-auto no-scrollbar flex justify-center">
+                  <div style={{ minWidth: "max-content" }}>
+                    <div className="flex gap-[3px] mb-1">
+                      {weeks.map((_, wi) => {
+                        const mc = monthCols.find(m => m.wi === wi);
+                        return (
+                          <div key={wi} style={{ width: 11, minWidth: 11 }}>
+                            {mc && <span className="text-[9px]" style={{ color: t.textMuted, fontFamily: "'HelveticaNeue', sans-serif", whiteSpace: "nowrap" }}>{mc.month}</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex gap-[3px]">
+                      {weeks.map((week, wi) => (
+                        <div key={wi} className="flex flex-col gap-[3px]">
+                          {week.map((cell, di) => (
+                            <div
+                              key={di}
+                              onMouseEnter={cell?.data ? (e) => {
+                                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                setCellTooltip({ date: cell.key, names: cell.data!.names, x: rect.left + rect.width / 2, y: rect.top });
+                              } : undefined}
+                              onMouseLeave={cell?.data ? () => setCellTooltip(null) : undefined}
+                              style={{
+                                width: 11, height: 11, borderRadius: 2, flexShrink: 0,
+                                backgroundColor: cell ? getColor(cell.data?.count ?? 0) : "transparent",
+                                opacity: cell && cell.date > today ? 0.25 : 1,
+                                cursor: cell?.data ? "pointer" : "default",
+                              }}
+                            />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+          </FadeIn>
+
+          {/* Heatmap tooltip */}
+          {cellTooltip && (
+            <div
+              className="no-print"
+              onMouseLeave={() => setCellTooltip(null)}
+              style={{
+                position: "fixed",
+                left: cellTooltip.x,
+                top: cellTooltip.y - 8,
+                transform: "translate(-50%, -100%)",
+                zIndex: 9999,
+                backgroundColor: "#1f2328",
+                color: "#e6edf3",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+                borderRadius: 8,
+                padding: "8px 12px",
+                maxWidth: 220,
+                pointerEvents: "none",
+              }}
+            >
+              <p className="text-[10px] font-semibold mb-1.5" style={{ color: "#8b949e", fontFamily: "'HelveticaNeue', sans-serif" }}>{cellTooltip.date}</p>
+              {cellTooltip.names.map((name, i) => (
+                <p key={i} className="text-xs" style={{ fontFamily: "'HelveticaNeue', sans-serif", fontWeight: 500, color: "#e6edf3" }}>{name}</p>
+              ))}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8 print-single-col">
           {/* LEFT: Skills + Achievements */}
           <aside className="space-y-5 order-2 lg:order-1 print-order-1 print-mb lg:sticky lg:top-6 lg:self-start">
@@ -1539,6 +1761,7 @@ export default function CVPage({
               );
             })()}
           </section>
+          </div>
           </div>
           )}
 
