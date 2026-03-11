@@ -714,6 +714,8 @@ const Home = () => {
     }))
   );
   const [featuredProjectIds, setFeaturedProjectIds] = useState<number[]>((data as any).featuredProjectIds ?? []);
+  const [projectDescriptionOverrides, setProjectDescriptionOverrides] = useState<Record<string, string>>((data as any).projectDescriptionOverrides ?? {});
+  const [descOverridePreviews, setDescOverridePreviews] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<"profile" | "experiences" | "projects" | "settings">("profile");
   const [bioPreview, setBioPreview] = useState(false);
   const [workExperiences, setWorkExperiences] = useState<WorkExperience[]>([]);
@@ -1154,6 +1156,55 @@ const Home = () => {
                       })}
                     </div>
                   </div>
+
+                  {/* Featured Project Description Overrides */}
+                  {featuredProjectIds.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-neutral-200 mb-1">Featured Project Descriptions</p>
+                      <p className="text-xs text-neutral-500 mb-3">Override the auto-fetched description for each featured project. Leave blank to keep the default.</p>
+                      <div className="space-y-3">
+                        {projectList.filter((p: any) => featuredProjectIds.includes(p.id)).map((project: any) => {
+                          const slug = project.project.slug;
+                          const preview = !!descOverridePreviews[slug];
+                          const val = projectDescriptionOverrides[slug] ?? "";
+                          return (
+                            <div key={project.id}>
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-xs text-neutral-400 truncate">{project.project.name}</p>
+                                <div className="flex items-center gap-2 shrink-0 ml-2">
+                                  <span className="text-[10px] text-neutral-600">Markdown available: **bold**, *italic*, `code`</span>
+                                  <button onClick={() => setDescOverridePreviews((p) => ({ ...p, [slug]: !p[slug] }))}
+                                    className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${preview ? "border-green-700 text-green-400 bg-green-950/30" : "border-neutral-700 text-neutral-500 hover:text-neutral-300"}`}
+                                  >
+                                    {preview ? "Edit" : "Preview"}
+                                  </button>
+                                </div>
+                              </div>
+                              {preview ? (
+                                <div className="min-h-[60px] w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 space-y-1">
+                                  {val.split("\n").filter(Boolean).map((line, i) => (
+                                    <p key={i} className="text-sm leading-relaxed text-neutral-300">{renderMdPreview(line)}</p>
+                                  ))}
+                                  {!val && <p className="text-neutral-600 text-sm">Nothing to preview yet.</p>}
+                                </div>
+                              ) : (
+                                <textarea
+                                  value={val}
+                                  placeholder="Leave blank to use the default description…"
+                                  rows={2}
+                                  onChange={(e) => setProjectDescriptionOverrides((prev) => ({ ...prev, [slug]: e.target.value }))}
+                                  onBlur={async () => {
+                                    await axios.patch("/api/v2/me", { isDisplayEmail: isDisplayEmail ? "true" : "false", isDisplayName: isDisplayName ? "true" : "false", projectDescriptionOverrides });
+                                  }}
+                                  className="w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600 resize-none"
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Project GitHub Links */}
                   <div>

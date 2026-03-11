@@ -66,6 +66,7 @@ type PublicProfile = {
   phone: string | null;
   bio: string | null;
   projectGithubLinks: Record<string, string>;
+  projectDescriptionOverrides: Record<string, string>;
   workExperiences: WorkExperience[];
   featuredProjectIds: number[];
   skillTags: SkillTag[];
@@ -936,7 +937,7 @@ export default function CVPage({
 
           {/* Tab bar */}
           {hasOverview && (
-            <div className="no-print max-w-6xl mx-auto px-4 sm:px-6 pt-3 pb-0 flex gap-1">
+            <div className="no-print max-w-6xl mx-auto px-4 sm:px-6 pt-0 pb-0 flex gap-1">
               <button
                 onClick={() => setView("overview")}
                 className="px-4 py-2 text-xs font-medium rounded-t-lg border-b-2 transition-colors"
@@ -1166,7 +1167,7 @@ export default function CVPage({
                   {featuredProjects.map((project, i) => {
                     const tier = scoreTier(project.finalMark, project.validated);
                     const tColors = t.tierColors[tier];
-                    const desc = projectDescriptions[project.slug];
+                    const desc = profile.projectDescriptionOverrides[project.slug] || projectDescriptions[project.slug];
                     const stat = project.teamId ? teamStats[project.teamId] : null;
                     return (
                       <FadeIn key={project.id} delay={100 + i * 60}>
@@ -1269,7 +1270,11 @@ export default function CVPage({
                           {desc === "loading" ? (
                             <p className="text-xs italic" style={{ color: t.textMuted }}>Loading...</p>
                           ) : desc ? (
-                            <p className="text-[15px] leading-relaxed" style={{ color: t.textSub }}>{desc}</p>
+                            <div className="text-[15px] leading-relaxed space-y-1.5" style={{ color: t.textSub }}>
+                              {desc.split("\n").filter(Boolean).map((line, i) => (
+                                <p key={i}>{renderMd(line)}</p>
+                              ))}
+                            </div>
                           ) : (
                             <p className="text-sm italic" style={{ color: t.textMuted }}>No description available.</p>
                           )}
@@ -1849,6 +1854,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       phone: (user as any).phone ?? null,
       bio: (user as any).bio ?? null,
       projectGithubLinks: {},
+      projectDescriptionOverrides: (user as any).projectDescriptionOverrides ?? {},
       workExperiences: [],  // populated below
       featuredProjectIds: (user as any).featuredProjectIds ?? [],
       skillTags: ((user as any).skillTags as any[] ?? []).map((t: any) => ({

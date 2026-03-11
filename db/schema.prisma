@@ -60,9 +60,10 @@ model User {
   isDisplayCohortRank         Boolean @default(false)
   isDisplayAllTimeRank        Boolean @default(false)
   bio                         String?
-  featuredProjectIds          Int[]   @default([])
-  skillTags                   Json?
-  workExperiences             WorkExperience[]
+  featuredProjectIds              Int[]   @default([])
+  skillTags                       Json?
+  projectDescriptionOverrides     Json?
+  workExperiences                 WorkExperience[]
 }
 
 model WorkExperience {

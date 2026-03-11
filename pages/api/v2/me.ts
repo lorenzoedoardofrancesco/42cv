@@ -68,7 +68,7 @@ class ValidateError extends Error {
 
 const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount, isPublicProfile, isDisplayOutstandingVotes, selectedAchievementIds, githubUrl, linkedinUrl, address, phone, defaultDarkMode, isDisplayCampusCohortRank, isDisplayCohortRank, isDisplayAllTimeRank, bio, featuredProjectIds, skillTags } = req.body as {
+    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount, isPublicProfile, isDisplayOutstandingVotes, selectedAchievementIds, githubUrl, linkedinUrl, address, phone, defaultDarkMode, isDisplayCampusCohortRank, isDisplayCohortRank, isDisplayAllTimeRank, bio, featuredProjectIds, skillTags, projectDescriptionOverrides } = req.body as {
       isDisplayEmail?: string;
       isDisplayName?: string;
       isDisplayPhoto?: string;
@@ -87,6 +87,7 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       bio?: string;
       featuredProjectIds?: number[];
       skillTags?: any;
+      projectDescriptionOverrides?: Record<string, string>;
     };
     if (!isDisplayEmail || !isDisplayName)
       throw new ValidateError(
@@ -134,6 +135,7 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
           featuredProjectIds: { set: featuredProjectIds },
         }),
         ...(skillTags !== undefined && { skillTags }),
+        ...(projectDescriptionOverrides !== undefined && { projectDescriptionOverrides }),
       },
     });
 
