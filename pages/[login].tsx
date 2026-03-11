@@ -1,4 +1,5 @@
 import { GetServerSideProps } from "next";
+import { getToken } from "next-auth/jwt";
 import Head from "next/head";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -488,6 +489,7 @@ export default function CVPage({
   showOutstandingVotes,
   defaultDarkMode,
   rankings,
+  isViewer42,
 }: {
   profile: PublicProfile;
   initialDescriptions: Record<string, string | null>;
@@ -497,6 +499,7 @@ export default function CVPage({
   showOutstandingVotes: boolean;
   defaultDarkMode: boolean;
   rankings: Rankings | null;
+  isViewer42: boolean;
 }) {
   const [dark, setDark] = useState(defaultDarkMode);
   const t = tokens(dark);
@@ -784,7 +787,7 @@ export default function CVPage({
             )}
 
             {/* Stat strip - 6 items on desktop, 3+3 on mobile */}
-            <div className="mt-6">
+            <div className="mt-3">
             <div className="flex items-center gap-3 mb-3">
               <div className="flex-1 h-px" style={{ backgroundColor: t.hrColor }} />
               <div className="flex items-center gap-1.5 shrink-0">
@@ -1180,7 +1183,7 @@ export default function CVPage({
                           {/* Score badge */}
                           <div className="shrink-0">
                             <span
-                              className="text-sm sm:text-base px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border inline-block min-w-[48px] sm:min-w-[58px] text-center"
+                              className="text-sm sm:text-base rounded-lg border inline-flex items-center justify-center min-w-[48px] sm:min-w-[58px] h-8 sm:h-9"
                               style={{
                                 color: tColors.color,
                                 backgroundColor: tColors.bg,
@@ -1247,21 +1250,23 @@ export default function CVPage({
                                 </svg>
                               </a>
                             )}
-                            <a
-                              href={`https://projects.intra.42.fr/projects/${project.slug}/projects_users/${project.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full border transition-colors shrink-0"
-                              style={{ borderColor: `${accent}40`, backgroundColor: `${accent}10` }}
-                              title="View on 42 Intra"
-                            >
-                              <svg width="14" height="14" viewBox="442 17 44 30" fill={accent} xmlns="http://www.w3.org/2000/svg">
-                                <path d="M442 38.7359H457.473V46.4891H465.194V32.4781H449.748L465.194 17H457.473L442 32.4781V38.7359Z" />
-                                <path d="M468.527 24.7484L476.252 17H468.527V24.7484Z" />
-                                <path d="M476.252 24.7484L468.527 32.4781V40.2031H476.252V32.4781L484 24.7484V17H476.252V24.7484Z" />
-                                <path d="M484 32.4781L476.252 40.2031H484V32.4781Z" />
-                              </svg>
-                            </a>
+                            {isViewer42 && (
+                              <a
+                                href={`https://projects.intra.42.fr/projects/${project.slug}/projects_users/${project.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full border transition-colors shrink-0"
+                                style={{ borderColor: `${accent}40`, backgroundColor: `${accent}10` }}
+                                title="View on 42 Intra"
+                              >
+                                <svg width="14" height="14" viewBox="442 17 44 30" fill={accent} xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M442 38.7359H457.473V46.4891H465.194V32.4781H449.748L465.194 17H457.473L442 32.4781V38.7359Z" />
+                                  <path d="M468.527 24.7484L476.252 17H468.527V24.7484Z" />
+                                  <path d="M476.252 24.7484L468.527 32.4781V40.2031H476.252V32.4781L484 24.7484V17H476.252V24.7484Z" />
+                                  <path d="M484 32.4781L476.252 40.2031H484V32.4781Z" />
+                                </svg>
+                              </a>
+                            )}
                           </div>
                         </div>
 
@@ -1653,7 +1658,7 @@ export default function CVPage({
                                 {/* Score badge */}
                                 <div className="shrink-0">
                                   <span
-                                    className="text-sm sm:text-base px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border inline-block min-w-[48px] sm:min-w-[58px] text-center"
+                                    className="text-sm sm:text-base rounded-lg border inline-flex items-center justify-center min-w-[48px] sm:min-w-[58px] h-8 sm:h-9"
                                     style={{
                                       color: tColors.color,
                                       backgroundColor: tColors.bg,
@@ -1704,11 +1709,8 @@ export default function CVPage({
                                   );
                                 })()}
 
-                                {/* Chevron + GitHub link + intra link */}
+                                {/* GitHub link + intra link + chevron */}
                                 <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 no-print">
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: t.textMuted, transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}>
-                                    <polyline points="6 9 12 15 18 9" />
-                                  </svg>
                                   {profile.projectGithubLinks[project.slug] && (
                                     <a
                                       href={profile.projectGithubLinks[project.slug]}
@@ -1724,22 +1726,27 @@ export default function CVPage({
                                       </svg>
                                     </a>
                                   )}
-                                  <a
-                                    href={`https://projects.intra.42.fr/projects/${project.slug}/projects_users/${project.id}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full border transition-colors shrink-0"
-                                    style={{ borderColor: `${accent}40`, backgroundColor: `${accent}10` }}
-                                    title="View on 42 Intra"
-                                  >
-                                    <svg width="14" height="14" viewBox="442 17 44 30" fill={accent} xmlns="http://www.w3.org/2000/svg">
-                                      <path d="M442 38.7359H457.473V46.4891H465.194V32.4781H449.748L465.194 17H457.473L442 32.4781V38.7359Z" />
-                                      <path d="M468.527 24.7484L476.252 17H468.527V24.7484Z" />
-                                      <path d="M476.252 24.7484L468.527 32.4781V40.2031H476.252V32.4781L484 24.7484V17H476.252V24.7484Z" />
-                                      <path d="M484 32.4781L476.252 40.2031H484V32.4781Z" />
-                                    </svg>
-                                  </a>
+                                  {isViewer42 && (
+                                    <a
+                                      href={`https://projects.intra.42.fr/projects/${project.slug}/projects_users/${project.id}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full border transition-colors shrink-0"
+                                      style={{ borderColor: `${accent}40`, backgroundColor: `${accent}10` }}
+                                      title="View on 42 Intra"
+                                    >
+                                      <svg width="14" height="14" viewBox="442 17 44 30" fill={accent} xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M442 38.7359H457.473V46.4891H465.194V32.4781H449.748L465.194 17H457.473L442 32.4781V38.7359Z" />
+                                        <path d="M468.527 24.7484L476.252 17H468.527V24.7484Z" />
+                                        <path d="M476.252 24.7484L468.527 32.4781V40.2031H476.252V32.4781L484 24.7484V17H476.252V24.7484Z" />
+                                        <path d="M484 32.4781L476.252 40.2031H484V32.4781Z" />
+                                      </svg>
+                                    </a>
+                                  )}
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: t.textMuted, transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}>
+                                    <polyline points="6 9 12 15 18 9" />
+                                  </svg>
                                 </div>
                               </div>
 
@@ -1784,7 +1791,7 @@ export default function CVPage({
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps = async ({ params, req }) => {
   const login = params?.login as string;
 
   try {
@@ -1954,7 +1961,10 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       }
     }
 
-    return { props: { profile, initialDescriptions, correctionNumbers, teamStats: statMap, uncachedTeamIds, showOutstandingVotes, defaultDarkMode, rankings } };
+    const token = await getToken({ req });
+    const isViewer42 = !!token;
+
+    return { props: { profile, initialDescriptions, correctionNumbers, teamStats: statMap, uncachedTeamIds, showOutstandingVotes, defaultDarkMode, rankings, isViewer42 } };
   } catch (e) {
     console.error(e);
     return { notFound: true };
