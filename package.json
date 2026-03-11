@@ -26,6 +26,7 @@
     "@icons-pack/react-simple-icons": "^9.7.0",
     "@prisma/client": "^5.22.0",
     "axios": "^1.7.0",
+    "cloudinary": "^2.9.0",
     "lodash-es": "^4.17.21",
     "next": "^14.2.0",
     "next-auth": "^4.24.0",

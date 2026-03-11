@@ -68,11 +68,12 @@ class ValidateError extends Error {
 
 const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount, isPublicProfile, isDisplayOutstandingVotes, selectedAchievementIds, githubUrl, linkedinUrl, address, phone, defaultDarkMode, isDisplayCampusCohortRank, isDisplayCohortRank, isDisplayAllTimeRank, bio, featuredProjectIds, skillTags, projectDescriptionOverrides } = req.body as {
+    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount, isPublicProfile, isDisplayOutstandingVotes, selectedAchievementIds, githubUrl, linkedinUrl, address, phone, defaultDarkMode, isDisplayCampusCohortRank, isDisplayCohortRank, isDisplayAllTimeRank, bio, featuredProjectIds, skillTags, projectDescriptionOverrides, photoMode } = req.body as {
       isDisplayEmail?: string;
       isDisplayName?: string;
       isDisplayPhoto?: string;
       isDisplayProjectCount?: string;
+      photoMode?: string;
       isPublicProfile?: string;
       isDisplayOutstandingVotes?: string;
       selectedAchievementIds?: number[];
@@ -136,6 +137,7 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         }),
         ...(skillTags !== undefined && { skillTags }),
         ...(projectDescriptionOverrides !== undefined && { projectDescriptionOverrides }),
+        ...(photoMode !== undefined && { photoMode }),
       },
     });
 

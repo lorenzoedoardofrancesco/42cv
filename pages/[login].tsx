@@ -678,19 +678,23 @@ export default function CVPage({
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-end">
+            <div className="flex flex-col sm:flex-row gap-5 sm:gap-7 items-center sm:items-center">
               {/* Avatar */}
               {profile.profileImage && (
-                <div
-                  className="shrink-0 w-24 h-24 rounded-xl overflow-hidden border"
-                  style={{ borderColor: t.cardBorder, boxShadow: t.cardShadow }}
-                >
-                  <img src={profile.profileImage} alt={profile.login} className="w-full h-full object-cover" />
+                <div className="shrink-0 self-start sm:self-auto">
+                  <div
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden"
+                    style={{
+                      boxShadow: `0 0 0 3px ${accent}55, 0 4px 20px rgba(0,0,0,0.35)`,
+                    }}
+                  >
+                    <img src={profile.profileImage} alt={profile.login} className="w-full h-full object-cover" />
+                  </div>
                 </div>
               )}
 
               {/* Identity */}
-              <div className="flex-1 min-w-0 pb-1">
+              <div className="flex-1 min-w-0">
                 <h1
                   className="text-3xl sm:text-5xl font-bold tracking-tight leading-none"
                   style={{ fontFamily: "'HelveticaNeue', sans-serif", color: t.text }}
@@ -1819,12 +1823,16 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req }) =>
           )?.campus_id
       ) ?? data.campus[0];
 
-    const profileImageUrl = user.isDisplayPhoto
-      ? data.image?.versions?.medium || data.image?.link || data.image_url
-      : null;
-    const profileImage = profileImageUrl
-      ? await getBase64ImageFromUrl(encodeURI(profileImageUrl)).catch(() => null)
-      : null;
+    const photoMode = (user as any).photoMode ?? "none";
+    let profileImage: string | null = null;
+    if (photoMode === "custom" && (user as any).customPhotoUrl) {
+      profileImage = (user as any).customPhotoUrl;
+    } else if (photoMode === "42campus") {
+      const profileImageUrl = data.image?.versions?.medium || data.image?.link || data.image_url;
+      profileImage = profileImageUrl
+        ? await getBase64ImageFromUrl(encodeURI(profileImageUrl)).catch(() => null)
+        : null;
+    }
 
     const profile: PublicProfile = {
       login: data.login,

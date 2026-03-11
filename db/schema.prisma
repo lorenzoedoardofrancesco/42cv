@@ -47,6 +47,8 @@ model User {
   isDisplayEmail              Boolean @default(true)
   isDisplayName               Boolean @default(true)
   isDisplayPhoto              Boolean @default(false)
+  photoMode                   String  @default("none")
+  customPhotoUrl              String?
   isDisplayProjectCount       Boolean @default(true)
   isPublicProfile             Boolean @default(false)
   isDisplayOutstandingVotes   Boolean @default(true)

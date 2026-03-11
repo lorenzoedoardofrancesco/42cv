@@ -694,6 +694,9 @@ const Home = () => {
   const [isDisplayName, setIsDisplayName] = useState(data.isDisplayName);
   const [isDisplayEmail, setIsDisplayEmail] = useState(data.isDisplayEmail);
   const [isDisplayPhoto, setIsDisplayPhoto] = useState(data.isDisplayPhoto);
+  const [photoMode, setPhotoMode] = useState<"none" | "42campus" | "custom">((data as any).photoMode ?? "none");
+  const [customPhotoUrl, setCustomPhotoUrl] = useState<string>((data as any).customPhotoUrl ?? "");
+  const [photoUploading, setPhotoUploading] = useState(false);
   const [isDisplayProjectCount, setIsDisplayProjectCount] = useState((data as any).isDisplayProjectCount ?? true);
   const [isPublicProfile, setIsPublicProfile] = useState((data as any).isPublicProfile ?? false);
   const [isDisplayOutstandingVotes, setIsDisplayOutstandingVotes] = useState((data as any).isDisplayOutstandingVotes ?? true);
@@ -962,6 +965,75 @@ const Home = () => {
               {/* ── PROFILE TAB ── */}
               {activeTab === "profile" && (
                 <div className="space-y-6 pt-1">
+                  {/* Profile Photo */}
+                  <div>
+                    <p className="text-sm font-medium text-neutral-200 mb-1">Profile Photo</p>
+                    <p className="text-xs text-neutral-500 mb-3">Choose what appears as your photo on the CV.</p>
+                    <div className="flex rounded-lg border border-neutral-700 overflow-hidden w-fit mb-4">
+                      {([
+                        { value: "none", label: "None" },
+                        { value: "42campus", label: "42 Campus" },
+                        { value: "custom", label: "Custom" },
+                      ] as const).map(({ value, label }) => (
+                        <button key={value}
+                          onClick={async () => {
+                            setPhotoMode(value);
+                            await axios.patch("/api/v2/me", { isDisplayEmail: isDisplayEmail ? "true" : "false", isDisplayName: isDisplayName ? "true" : "false", photoMode: value });
+                          }}
+                          className={`px-3 py-1.5 text-xs font-medium transition-colors ${photoMode === value ? "bg-neutral-600 text-white" : "bg-neutral-800 text-neutral-400 hover:text-neutral-200"}`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    {photoMode === "custom" && (
+                      <div className="flex items-start gap-4">
+                        {customPhotoUrl && (
+                          <div className="relative shrink-0">
+                            <img src={customPhotoUrl} alt="Custom photo" className="w-16 h-16 rounded-full object-cover border-2 border-neutral-700" />
+                            <button
+                              onClick={async () => {
+                                await axios.delete("/api/v2/upload-photo");
+                                setCustomPhotoUrl("");
+                                setPhotoMode("none");
+                              }}
+                              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-neutral-900 border border-neutral-600 flex items-center justify-center text-neutral-400 hover:text-red-400 hover:border-red-700 transition-colors"
+                              title="Remove photo"
+                            >
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <label className={`flex items-center justify-center w-full h-16 border-2 border-dashed border-neutral-700 rounded-lg cursor-pointer hover:border-neutral-500 transition-colors ${photoUploading ? "opacity-50 pointer-events-none" : ""}`}>
+                            <span className="text-xs text-neutral-500">{photoUploading ? "Uploading…" : "Click to upload JPG/PNG · max 200 KB · square recommended"}</span>
+                            <input type="file" accept="image/jpeg,image/png" className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                if (file.size > 200 * 1024) { alert("Image must be under 200 KB."); return; }
+                                setPhotoUploading(true);
+                                const reader = new FileReader();
+                                reader.onload = async () => {
+                                  try {
+                                    const { data: res } = await axios.post("/api/v2/upload-photo", { dataUrl: reader.result });
+                                    setCustomPhotoUrl(res.url);
+                                    setPhotoMode("custom");
+                                  } catch (err: any) {
+                                    alert(err?.response?.data?.message ?? "Upload failed");
+                                  } finally {
+                                    setPhotoUploading(false);
+                                  }
+                                };
+                                reader.readAsDataURL(file);
+                              }}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <hr className="border-neutral-800" />
                   {/* Bio */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -1335,8 +1407,7 @@ const Home = () => {
                 email: isDisplayEmail && data.extended42Data.email,
                 level: selectedCursus.level,
                 profileImage: isDisplayPhoto
-                  ? data.extended42Data.image?.versions?.medium ||
-                    data.extended42Data.image?.link
+                  ? (photoMode === "custom" && customPhotoUrl) || data.extended42Data.image?.versions?.medium || data.extended42Data.image?.link
                   : null,
                 projectCount: isDisplayProjectCount
                   ? data.extended42Data.projects_users.filter(

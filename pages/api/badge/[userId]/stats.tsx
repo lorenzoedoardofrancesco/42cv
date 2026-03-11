@@ -62,15 +62,21 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
           ).campus_id
       ) ?? user.extended42Data.campus[0];
 
-    const profileImageUrl = user.isDisplayPhoto
-      ? user.extended42Data.image?.versions?.small ||
-        user.extended42Data.image?.link ||
-        user.extended42Data.image_url
-      : null;
-
-    const profileImage = profileImageUrl
-      ? await getBase64ImageFromUrl(encodeURI(profileImageUrl)).catch(() => null)
-      : null;
+    const photoMode = (user as any).photoMode ?? "none";
+    const customPhotoUrl = (user as any).customPhotoUrl ?? null;
+    let profileImage: string | null = null;
+    if (user.isDisplayPhoto) {
+      if (photoMode === "custom" && customPhotoUrl) {
+        profileImage = await getBase64ImageFromUrl(encodeURI(customPhotoUrl)).catch(() => null);
+      } else {
+        const profileImageUrl = user.extended42Data.image?.versions?.small ||
+          user.extended42Data.image?.link ||
+          user.extended42Data.image_url;
+        profileImage = profileImageUrl
+          ? await getBase64ImageFromUrl(encodeURI(profileImageUrl)).catch(() => null)
+          : null;
+      }
+    }
 
     if (process.env.NODE_ENV === "production") {
       const ExpiresDate = new Date();
