@@ -491,6 +491,7 @@ export default function CVPage({
   defaultDarkMode,
   rankings,
   isViewer42,
+  isDisplayJourney,
 }: {
   profile: PublicProfile;
   initialDescriptions: Record<string, string | null>;
@@ -501,6 +502,7 @@ export default function CVPage({
   defaultDarkMode: boolean;
   rankings: Rankings | null;
   isViewer42: boolean;
+  isDisplayJourney: boolean;
 }) {
   const [dark, setDark] = useState(defaultDarkMode);
   const t = tokens(dark);
@@ -519,6 +521,7 @@ export default function CVPage({
   };
 
   const hasOverview = profile.workExperiences.length > 0 || profile.featuredProjectIds.length > 0 || profile.credlyBadges.length > 0;
+  const showJourneyTab = hasOverview && isDisplayJourney;
   const [view, setView] = useState<"overview" | "full">(hasOverview ? "overview" : "full");
 
   const mainCursus =
@@ -944,7 +947,7 @@ export default function CVPage({
           </div>
 
           {/* Tab bar */}
-          {hasOverview && (
+          {showJourneyTab && (
             <div className="no-print max-w-6xl mx-auto px-4 sm:px-6 pt-0 pb-0 flex gap-1">
               <button
                 onClick={() => setView("overview")}
@@ -976,7 +979,7 @@ export default function CVPage({
 
         {/* ── MAIN CONTENT ──────────────────────────────────────────── */}
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
-          {view === "overview" && hasOverview ? (
+          {(view === "overview" || !isDisplayJourney) && hasOverview ? (
           <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8 print-single-col">
           {/* OVERVIEW LEFT: Skill Tags + Achievements */}
           <aside className="space-y-5 order-2 lg:order-1 print-order-1 print-mb lg:sticky lg:top-6 lg:self-start">
@@ -1989,6 +1992,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req }) =>
 
     const showOutstandingVotes = (user as any).isDisplayOutstandingVotes ?? true;
     const defaultDarkMode = (user as any).defaultDarkMode ?? false;
+    const isDisplayJourney = (user as any).isDisplayJourney ?? true;
 
     // Rankings - read from weekly cache, only expose enabled flags
     const showAllTimeRank = (user as any).isDisplayAllTimeRank ?? false;
@@ -2018,7 +2022,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req }) =>
     const token = await getToken({ req });
     const isViewer42 = !!token;
 
-    return { props: { profile, initialDescriptions, correctionNumbers, teamStats: statMap, uncachedTeamIds, showOutstandingVotes, defaultDarkMode, rankings, isViewer42 } };
+    return { props: { profile, initialDescriptions, correctionNumbers, teamStats: statMap, uncachedTeamIds, showOutstandingVotes, defaultDarkMode, rankings, isViewer42, isDisplayJourney } };
   } catch (e) {
     console.error(e);
     return { notFound: true };

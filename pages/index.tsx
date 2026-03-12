@@ -795,6 +795,7 @@ const Home = () => {
   const [isDisplayProjectCount, setIsDisplayProjectCount] = useState((data as any).isDisplayProjectCount ?? true);
   const [isPublicProfile, setIsPublicProfile] = useState((data as any).isPublicProfile ?? false);
   const [isDisplayOutstandingVotes, setIsDisplayOutstandingVotes] = useState((data as any).isDisplayOutstandingVotes ?? true);
+  const [isDisplayJourney, setIsDisplayJourney] = useState<boolean>((data as any).isDisplayJourney ?? true);
   const [selectedAchievementIds, setSelectedAchievementIds] = useState<number[]>((data as any).selectedAchievementIds ?? []);
   const [githubUrl, setGithubUrl] = useState<string>((data as any).githubUrl ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState<string>((data as any).linkedinUrl ?? "");
@@ -1545,6 +1546,21 @@ const Home = () => {
                       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${isDisplayOutstandingVotes ? "bg-green-600" : "bg-neutral-700"}`}
                     >
                       <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isDisplayOutstandingVotes ? "translate-x-6" : "translate-x-1"}`} />
+                    </button>
+                  </label>
+
+                  <hr className="border-neutral-800" />
+
+                  {/* Journey tab */}
+                  <label className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-neutral-200">Show 42 Journey tab</p>
+                      <p className="text-xs text-neutral-500 mt-0.5">Display the activity heatmap and 42 stats tab on your CV. Only visible when the Overview is active.</p>
+                    </div>
+                    <button onClick={async () => { const next = !isDisplayJourney; setIsDisplayJourney(next); await patchMe({ isDisplayJourney: next ? "true" : "false" }); }}
+                      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${isDisplayJourney ? "bg-green-600" : "bg-neutral-700"}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isDisplayJourney ? "translate-x-6" : "translate-x-1"}`} />
                     </button>
                   </label>
                 </div>

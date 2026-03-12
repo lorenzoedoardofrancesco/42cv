@@ -80,7 +80,7 @@ class ValidateError extends Error {
 
 const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount, isPublicProfile, isDisplayOutstandingVotes, selectedAchievementIds, githubUrl, linkedinUrl, address, phone, defaultDarkMode, isDisplayCampusCohortRank, isDisplayCohortRank, isDisplayAllTimeRank, bio, featuredProjectIds, skillTags, projectDescriptionOverrides, credlyBadges, photoMode } = req.body as {
+    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount, isPublicProfile, isDisplayOutstandingVotes, selectedAchievementIds, githubUrl, linkedinUrl, address, phone, defaultDarkMode, isDisplayCampusCohortRank, isDisplayCohortRank, isDisplayAllTimeRank, isDisplayJourney, bio, featuredProjectIds, skillTags, projectDescriptionOverrides, credlyBadges, photoMode } = req.body as {
       isDisplayEmail?: string;
       isDisplayName?: string;
       isDisplayPhoto?: string;
@@ -97,6 +97,7 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       isDisplayCampusCohortRank?: string;
       isDisplayCohortRank?: string;
       isDisplayAllTimeRank?: string;
+      isDisplayJourney?: string;
       bio?: string;
       featuredProjectIds?: number[];
       skillTags?: any;
@@ -144,6 +145,7 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         ...(isDisplayCampusCohortRank !== undefined && { isDisplayCampusCohortRank: isDisplayCampusCohortRank === "true" }),
         ...(isDisplayCohortRank !== undefined && { isDisplayCohortRank: isDisplayCohortRank === "true" }),
         ...(isDisplayAllTimeRank !== undefined && { isDisplayAllTimeRank: isDisplayAllTimeRank === "true" }),
+        ...(isDisplayJourney !== undefined && { isDisplayJourney: isDisplayJourney === "true" }),
         ...(bio !== undefined && { bio: bio || null }),
         ...(featuredProjectIds !== undefined && {
           featuredProjectIds: { set: featuredProjectIds },

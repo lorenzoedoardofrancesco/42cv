@@ -61,6 +61,7 @@ model User {
   isDisplayCampusCohortRank   Boolean @default(false)
   isDisplayCohortRank         Boolean @default(false)
   isDisplayAllTimeRank        Boolean @default(false)
+  isDisplayJourney            Boolean @default(true)
   bio                         String?
   featuredProjectIds              Int[]   @default([])
   skillTags                       Json?
