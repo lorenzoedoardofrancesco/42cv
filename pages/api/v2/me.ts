@@ -80,7 +80,7 @@ class ValidateError extends Error {
 
 const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount, isPublicProfile, isDisplayOutstandingVotes, selectedAchievementIds, githubUrl, linkedinUrl, address, phone, defaultDarkMode, isDisplayCampusCohortRank, isDisplayCohortRank, isDisplayAllTimeRank, isDisplayJourney, bio, featuredProjectIds, skillTags, projectDescriptionOverrides, credlyBadges, photoMode } = req.body as {
+    const { isDisplayEmail, isDisplayName, isDisplayPhoto, isDisplayProjectCount, isPublicProfile, isDisplayOutstandingVotes, selectedAchievementIds, githubUrl, linkedinUrl, websiteUrl, address, phone, defaultDarkMode, isDisplayCampusCohortRank, isDisplayCohortRank, isDisplayAllTimeRank, isDisplayJourney, bio, featuredProjectIds, skillTags, projectDescriptionOverrides, credlyBadges, photoMode } = req.body as {
       isDisplayEmail?: string;
       isDisplayName?: string;
       isDisplayPhoto?: string;
@@ -91,6 +91,7 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       selectedAchievementIds?: number[];
       githubUrl?: string;
       linkedinUrl?: string;
+      websiteUrl?: string;
       address?: string;
       phone?: string;
       defaultDarkMode?: string;
@@ -119,6 +120,7 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (address !== undefined && address && address.length > 200) return res.status(400).json({ message: "Address too long (max 200)" });
     if (githubUrl !== undefined && githubUrl && (!/^https?:\/\//i.test(githubUrl) || githubUrl.length > 2000)) return res.status(400).json({ message: "Invalid GitHub URL" });
     if (linkedinUrl !== undefined && linkedinUrl && (!/^https?:\/\//i.test(linkedinUrl) || linkedinUrl.length > 2000)) return res.status(400).json({ message: "Invalid LinkedIn URL" });
+    if (websiteUrl !== undefined && websiteUrl && (!/^https?:\/\//i.test(websiteUrl) || websiteUrl.length > 2000)) return res.status(400).json({ message: "Invalid website URL" });
     if (selectedAchievementIds !== undefined && (!Array.isArray(selectedAchievementIds) || selectedAchievementIds.length > 50)) return res.status(400).json({ message: "Invalid achievement IDs" });
     if (featuredProjectIds !== undefined && (!Array.isArray(featuredProjectIds) || featuredProjectIds.length > 5)) return res.status(400).json({ message: "Max 5 featured projects" });
     if (skillTags !== undefined) {
@@ -169,6 +171,7 @@ const PatchHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         }),
         ...(githubUrl !== undefined && { githubUrl: githubUrl || null }),
         ...(linkedinUrl !== undefined && { linkedinUrl: linkedinUrl || null }),
+        ...(websiteUrl !== undefined && { websiteUrl: websiteUrl || null }),
         ...(address !== undefined && { address: address || null }),
         ...(phone !== undefined && { phone: phone || null }),
         ...(defaultDarkMode !== undefined && { defaultDarkMode: defaultDarkMode === "true" }),

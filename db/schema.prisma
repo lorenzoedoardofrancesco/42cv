@@ -54,6 +54,7 @@ model User {
   selectedAchievementIds      Int[]   @default([])
   githubUrl                   String?
   linkedinUrl                 String?
+  websiteUrl                  String?
   address                     String?
   phone                       String?
   defaultDarkMode             Boolean @default(false)

@@ -804,6 +804,7 @@ const Home = () => {
   const [selectedAchievementIds, setSelectedAchievementIds] = useState<number[]>((data as any).selectedAchievementIds ?? []);
   const [githubUrl, setGithubUrl] = useState<string>((data as any).githubUrl ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState<string>((data as any).linkedinUrl ?? "");
+  const [websiteUrl, setWebsiteUrl] = useState<string>((data as any).websiteUrl ?? "");
   const [address, setAddress] = useState<string>((data as any).address ?? "");
   const [phone, setPhone] = useState<string>((data as any).phone ?? "");
   const [defaultDarkMode, setDefaultDarkMode] = useState<boolean>((data as any).defaultDarkMode ?? false);
@@ -1210,6 +1211,7 @@ const Home = () => {
                       {([
                         { label: "GitHub", value: githubUrl, set: setGithubUrl, key: "githubUrl", placeholder: "https://github.com/username", maxLength: 2000 },
                         { label: "LinkedIn", value: linkedinUrl, set: setLinkedinUrl, key: "linkedinUrl", placeholder: "https://linkedin.com/in/username", maxLength: 2000 },
+                        { label: "Website", value: websiteUrl, set: setWebsiteUrl, key: "websiteUrl", placeholder: "https://yourwebsite.com", maxLength: 2000 },
                         { label: "Address", value: address, set: setAddress, key: "address", placeholder: "City, Country", maxLength: 200 },
                         { label: "Phone", value: phone, set: setPhone, key: "phone", placeholder: "+41 79 000 00 00", maxLength: 20 },
                       ] as const).map(({ label, value, set, key, placeholder, maxLength }) => (
