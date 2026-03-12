@@ -1608,6 +1608,9 @@ const Home = () => {
                         p.cursus_ids.includes(parseInt(cursusId))
                     ).length
                   : null,
+                credlyBadges: credlyBadges.length > 0
+                  ? credlyBadges.filter((b) => b.imageUrl).map((b) => ({ imageUrl: b.imageUrl!, name: b.name }))
+                  : undefined,
               }}
             />
           </div>

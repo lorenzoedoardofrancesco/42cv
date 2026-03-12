@@ -78,6 +78,19 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
+    // Fetch Credly badge images (up to 4) as base64
+    const rawBadges = ((user as any).credlyBadges as { id: string; imageUrl?: string; name?: string }[] | null) ?? [];
+    const credlyBadges = (
+      await Promise.all(
+        rawBadges.slice(0, 4).map(async (b) => {
+          if (!b.imageUrl) return null;
+          const imageUrl = await getBase64ImageFromUrl(encodeURI(b.imageUrl)).catch(() => null);
+          if (!imageUrl) return null;
+          return { imageUrl, name: b.name };
+        })
+      )
+    ).filter(Boolean) as { imageUrl: string; name?: string }[];
+
     if (process.env.NODE_ENV === "production") {
       const ExpiresDate = new Date();
       ExpiresDate.setSeconds(ExpiresDate.getSeconds() + EXPIRE_TIME);
@@ -110,6 +123,7 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
                     p.cursus_ids.includes(cursus_user.cursus_id)
                 ).length
               : null,
+            credlyBadges: credlyBadges.length > 0 ? credlyBadges : undefined,
           }}
         />
       )
