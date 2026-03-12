@@ -49,10 +49,13 @@ export const updateUserExtends42Data: (
   }
   const ftSchoolAccountId = accounts["42-school"].providerAccountId;
 
-  const [{ data: extended42Data }, { data: coalitions }] = await Promise.all([
+  const [userRes, coalitionRes] = await Promise.all([
     get42User(ftSchoolAccountId),
     get42UserCoalition(ftSchoolAccountId),
   ]);
+  if (!userRes || !coalitionRes) throw new Error("Failed to fetch 42 data");
+  const extended42Data = userRes.data;
+  const coalitions = coalitionRes.data;
 
   user = (await prisma.user.update({
     where: {

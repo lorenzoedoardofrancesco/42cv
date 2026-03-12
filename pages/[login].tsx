@@ -1181,7 +1181,7 @@ export default function CVPage({
                         href={`https://www.credly.com/badges/${badge.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center gap-3 p-5 rounded-xl border transition-colors hover:border-opacity-80 w-[160px] sm:w-[180px] no-underline group"
+                        className="flex flex-col items-center gap-3 p-5 rounded-xl border transition-colors hover:opacity-90 w-[160px] sm:w-[180px] no-underline group"
                         style={{ borderColor: t.cardBorder, backgroundColor: t.cardBg, boxShadow: t.cardShadow, minHeight: "260px" }}
                       >
                         <div className="flex items-center justify-center w-28 h-28 shrink-0">

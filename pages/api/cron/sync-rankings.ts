@@ -75,7 +75,7 @@ async function fetchGroupLogins(groupId: number): Promise<string[]> {
         params: { "page[size]": 100, "page[number]": page },
       })
     );
-    const users: Array<{ login: string }> = res!.data;
+    const users: Array<{ login: string }> = res.data;
     if (!users.length) break;
     logins.push(...users.map((u) => u.login));
     if (users.length < 100) break;
@@ -128,14 +128,14 @@ async function fetchGlobalEntries(blocked: Set<string>, cp: Checkpoint): Promise
         params: { "filter[cursus_id]": 21, sort: "-level", "page[size]": 100, "page[number]": page },
       })
     );
-    const items: any[] = res!.data;
+    const items: any[] = res.data;
     if (!items.length) break;
     for (const item of items) {
       const u = item.user;
       if (u.staff === true || u.kind !== "student" || blocked.has(u.login)) continue;
       entries.push({ login: u.login, level: item.level, poolYear: u.pool_year ?? "" });
     }
-    const total = parseInt(res!.headers["x-total"] ?? "0", 10);
+    const total = parseInt(res.headers["x-total"] ?? "0", 10);
     if (page % 10 === 0 || page * 100 >= total) {
       await saveCheckpoint({ ...cp, entries, nextPage: page + 1, total, globalDone: false });
     }
@@ -170,14 +170,14 @@ async function fetchCampusEntries(
         params: { "filter[cursus_id]": 21, "filter[campus_id]": campusId, sort: "-level", "page[size]": 100, "page[number]": page },
       })
     );
-    const items: any[] = res!.data;
+    const items: any[] = res.data;
     if (!items.length) break;
     for (const item of items) {
       const u = item.user;
       if (u.staff === true || u.kind !== "student" || blocked.has(u.login)) continue;
       entries.push({ login: u.login, level: item.level, poolYear: u.pool_year ?? "" });
     }
-    const total = parseInt(res!.headers["x-total"] ?? "0", 10);
+    const total = parseInt(res.headers["x-total"] ?? "0", 10);
     if (page % 10 === 0 || page * 100 >= total) {
       await saveCheckpoint({ ...cp, [cpKey]: { entries, nextPage: page + 1 } });
     }

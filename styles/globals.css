@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@source "../pages";
+@source "../components";
+@source "../lib";
 
 @layer base {
   body {

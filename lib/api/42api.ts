@@ -5,10 +5,16 @@ import NodeCache from "node-cache";
 export const END_POINT_42API = "https://api.intra.42.fr";
 
 const apiCache = new NodeCache();
-export const queue = new PQueue({
+const _queue = new PQueue({
   interval: 1000,
   intervalCap: process.env.NODE_ENV === "production" ? 6 : 6,
+  throwOnTimeout: true,
 });
+
+export const queue = {
+  add: <T>(fn: () => Promise<T>) => _queue.add(fn) as Promise<T>,
+  onIdle: () => _queue.onIdle(),
+};
 
 export const axiosClientFor42 = axios.create({
   baseURL: END_POINT_42API,

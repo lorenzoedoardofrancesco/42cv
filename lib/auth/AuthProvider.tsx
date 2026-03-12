@@ -117,7 +117,7 @@ export const withAuth = (
       (option?.required42account && status === "link42accountrequired")
     ) {
       return (
-        <div className="flex justify-center items-center min-h-screen min-h-screen-ios">
+        <div className="flex justify-center items-center min-h-dvh">
           <Loading />
         </div>
       );
