@@ -1,6 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
+import { v2 as cloudinary } from "cloudinary";
 import prisma from "../../../db";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 import {
   updateUserExtends42Data,
   UserNotFound,
@@ -39,14 +46,19 @@ const DeleteHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const token = await getToken({ req });
     if (!token) throw new AuthError();
-    await prisma.user.delete({
-      where: {
-        email: token.email,
-      },
+
+    const user = await prisma.user.findUnique({
+      where: { email: token.email! },
+      select: { id: true, customPhotoUrl: true },
     });
-    return res.status(200).json({
-      message: "success",
-    });
+
+    if (user?.customPhotoUrl) {
+      await cloudinary.uploader.destroy(`cv_photos/${user.id}`).catch(() => {});
+    }
+
+    await prisma.user.delete({ where: { email: token.email } });
+
+    return res.status(200).json({ message: "success" });
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(401).json({
