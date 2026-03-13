@@ -5,6 +5,14 @@ import Header from "./Header";
 import Infomation from "./Infomation";
 import Level from "./Level";
 
+const F18: Record<string, number> = {" ":4.19,"'":3.38,"0":10.22,"1":10.22,"2":10.22,"3":10.22,"4":10.22,"5":10.22,"6":10.22,"7":10.22,"8":10.22,"9":10.22,A:11.2,B:9.54,C:11.63,D:11.38,E:8.68,F:7.81,G:13.64,H:11.92,I:4.43,J:5.51,K:10.22,L:6.44,M:15.53,N:13.79,O:14.29,P:8.21,Q:14.29,R:9.04,S:9.32,T:7.67,U:11.63,V:10.01,W:17.24,X:9.07,Y:9.54,Z:9.65,a:9.47,b:9.47,c:7.88,d:9.47,e:8.66,f:4.32,g:9.47,h:8.46,i:3.74,j:3.74,k:7.6,l:3.74,m:12.33,n:8.46,o:9.43,p:9.47,q:9.47,r:5.33,s:6.34,t:3.85,u:8.39,v:7.63,w:12.28,x:8.17,y:8.28,z:8.28};
+
+function measureTitle(text: string): number {
+  let w = 0;
+  for (const ch of text) w += F18[ch] ?? 9;
+  return w;
+}
+
 export type StatsProps = {
   data: {
     login: string;
@@ -54,14 +62,18 @@ const Stats = ({ data }: StatsProps) => {
   const avatarCx = 55;
   const avatarCy = infoCenterY - 3;
 
-  // Badges in header: match 42 logo size (logo effective y=25–57, height=32, center y=41)
-  // Logo effective x starts at ~424; title text ends at ~230
-  const badgeSize = 32;
+  const badgeSize = 42;
   const badgeGap = 8;
   const badgeTotalW = badges.length * badgeSize + (badges.length - 1) * badgeGap;
-  const headerBadgeCenterX = (230 + 424) / 2; // 327 - midpoint between title end and logo start
-  const headerBadgeStartX = headerBadgeCenterX - badgeTotalW / 2;
-  const headerBadgeY = 41 - badgeSize / 2; // same vertical center as 42 logo (y=25)
+  const titleText = `${data.login}'s ${data.campus} Stats`;
+  const titleRightX = 25 + measureTitle(titleText) * 1.05; // 5% faux-bold correction (font is regular, renders at weight 600)
+  const LOGO_LEFT_X = 424;
+  const BADGE_PADDING = 10;
+  const badgeZoneLeft = titleRightX + BADGE_PADDING;
+  const badgeZoneRight = LOGO_LEFT_X - BADGE_PADDING;
+  const badgeZoneWidth = Math.max(0, badgeZoneRight - badgeZoneLeft);
+  const headerBadgeStartX = badgeZoneLeft + (badgeZoneWidth - badgeTotalW) / 2;
+  const headerBadgeY = 41 - badgeSize / 2;
 
   return (
     <Container height={height} color={effectiveColor} isLevel21={isLevel21} isCarbon={isCarbon}>
