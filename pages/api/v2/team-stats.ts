@@ -38,6 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Fetch uncached/stale from 42 API in parallel
+  const toUpsert: { teamId: number; totalEvals: number; outstandingCount: number }[] = [];
   await Promise.allSettled(
     stillNeeded.map(async (teamId) => {
       try {
@@ -49,16 +50,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const totalEvals = scaleTeams.length;
         const outstandingCount = scaleTeams.filter((st: any) => st.flag?.id === 9).length;
         result[teamId] = { totalEvals, outstandingCount };
-        await (prisma as any).teamStat.upsert({
-          where: { teamId },
-          update: { totalEvals, outstandingCount, checkedAt: new Date() },
-          create: { teamId, totalEvals, outstandingCount },
-        });
+        toUpsert.push({ teamId, totalEvals, outstandingCount });
       } catch {
         // skip - stars just won't show for this one
       }
     })
   );
+
+  // Batch write all fetched results in a single transaction
+  if (toUpsert.length > 0) {
+    const now = new Date();
+    try {
+      await prisma.$transaction(
+        toUpsert.map(({ teamId, totalEvals, outstandingCount }) =>
+          (prisma as any).teamStat.upsert({
+            where: { teamId },
+            update: { totalEvals, outstandingCount, checkedAt: now },
+            create: { teamId, totalEvals, outstandingCount },
+          })
+        )
+      );
+    } catch {
+      // Still return what we fetched from the API
+    }
+  }
 
   return res.status(200).json(result);
 }

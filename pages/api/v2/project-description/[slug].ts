@@ -18,6 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (cached && Date.now() - new Date(cached.checkedAt).getTime() < CACHE_TTL_MS) {
+      res.setHeader("Cache-Control", "public, max-age=604800");
       return res.status(200).json({ description: cached.description });
     }
 
@@ -39,6 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       create: { slug, description, correctionNumber },
     });
 
+    res.setHeader("Cache-Control", "public, max-age=604800");
     return res.status(200).json({ description: newDescription, correctionNumber: newCorrectionNumber });
   } catch (e: any) {
     if (e?.response?.status === 404) {

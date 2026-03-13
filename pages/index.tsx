@@ -934,9 +934,12 @@ const Home = () => {
   const sortExps = (exps: WorkExperience[]) =>
     [...exps].sort((a, b) => (b.startDate ?? "").localeCompare(a.startDate ?? ""));
 
-  const usedSlugs42 = workExperiences.filter((e) => e.type === "FORTY_TWO").map((e) => e.projectSlug);
-  const validatedWork42 = data.extended42Data.projects_users
-    .filter((p: any) => p["validated?"] && WORK_EXP_SLUGS.has(p.project.slug) && (!usedSlugs42.includes(p.project.slug) || (editingExpId && workExperiences.find(e => e.id === editingExpId)?.projectSlug === p.project.slug)));
+  const validatedWork42 = useMemo(() => {
+    const usedSlugs42 = new Set(workExperiences.filter((e) => e.type === "FORTY_TWO").map((e) => e.projectSlug));
+    const editingSlug = editingExpId ? workExperiences.find((e) => e.id === editingExpId)?.projectSlug : null;
+    return data.extended42Data.projects_users
+      .filter((p: any) => p["validated?"] && WORK_EXP_SLUGS.has(p.project.slug) && (!usedSlugs42.has(p.project.slug) || p.project.slug === editingSlug));
+  }, [workExperiences, editingExpId, data.extended42Data.projects_users]);
   const [projectGithubLinks, setProjectGithubLinks] = useState<Record<string, string>>(() => {
     const links: Record<string, string> = {};
     for (const link of ((data as any).projectGithubLinks ?? []) as { projectSlug: string; githubUrl: string }[]) {
@@ -1484,7 +1487,7 @@ const Home = () => {
                       {credlyBadges.map((badge, i) => (
                         <div key={badge.id} className="flex items-center gap-3 p-3 bg-neutral-800 border border-neutral-700 rounded-lg">
                           {badge.imageUrl && (
-                            <img src={badge.imageUrl} alt={badge.name ?? badge.id} className="w-10 h-10 rounded object-contain shrink-0" />
+                            <img src={badge.imageUrl} alt={badge.name ?? badge.id} loading="lazy" className="w-10 h-10 rounded object-contain shrink-0" />
                           )}
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium text-neutral-300 truncate">{badge.name ?? badge.id}</p>

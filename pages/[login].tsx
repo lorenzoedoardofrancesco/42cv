@@ -2,7 +2,7 @@ import { GetServerSideProps } from "next";
 import { getToken } from "next-auth/jwt";
 import Head from "next/head";
 import Link from "next/link";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import prisma from "../db";
 import collection from "lodash-es/collection";
 import { getBase64ImageFromUrl } from "../lib/getBase64ImageFromUrl";
@@ -588,9 +588,12 @@ export default function CVPage({
     return sum + (stat?.outstandingCount ?? 0);
   }, 0);
 
-  const featuredProjects = profile.featuredProjectIds
-    .map((id) => profile.projects.find((p) => p.id === id))
-    .filter((p): p is Project => !!p);
+  const featuredProjects = useMemo(() => {
+    const projectMap = new Map(profile.projects.map((p) => [p.id, p]));
+    return profile.featuredProjectIds
+      .map((id) => projectMap.get(id))
+      .filter((p): p is Project => !!p);
+  }, [profile.featuredProjectIds, profile.projects]);
 
   const [lvlBarWidth, setLvlBarWidth] = useState(0);
   useEffect(() => {
