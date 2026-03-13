@@ -7,18 +7,22 @@ import { AuthContext, withAuth } from "../lib/auth/AuthProvider";
 import axios from "axios";
 import getCoalitions from "../lib/getCoalitions";
 import ProjectScore from "../components/badge/ProjectScore";
-import { WORK_EXP_SLUGS, WorkExperience, getEmploymentLabel, formatDateRange } from "../lib/workExperiences";
+import { WORK_EXP_SLUGS, WorkExperience } from "../lib/workExperiences";
 import { useModal } from "../components/common/AppModal";
 import { StarButton } from "../components/common/StarButton";
 import { SelectField } from "../components/common/SelectField";
 import { ToggleSwitch } from "../components/common/ToggleSwitch";
-import { renderMd } from "../components/common/RenderMd";
 import { StatsWrapper } from "../components/dashboard/StatsWrapper";
 import { StatsOptions } from "../components/dashboard/StatsOptions";
 import { FeedbackForm } from "../components/dashboard/FeedbackForm";
-import { SkillTagsEditor, SkillTagItem } from "../components/dashboard/SkillTagsEditor";
-import { ExpForm, ExpFormState } from "../components/dashboard/ExpForm";
+import { SkillTagItem } from "../components/dashboard/SkillTagsEditor";
+import { ExpFormState } from "../components/dashboard/ExpForm";
 import { parseCredlyBadgeId } from "../components/dashboard/Helpers";
+import { ProfileTab } from "../components/dashboard/tabs/ProfileTab";
+import { ExperiencesTab } from "../components/dashboard/tabs/ExperiencesTab";
+import { ProjectsTab } from "../components/dashboard/tabs/ProjectsTab";
+import { CertificationsTab } from "../components/dashboard/tabs/CertificationsTab";
+import { SettingsTab } from "../components/dashboard/tabs/SettingsTab";
 
 const Home = () => {
   const { data } = useContext(AuthContext);
@@ -96,7 +100,6 @@ const Home = () => {
   );
   const [featuredProjectIds, setFeaturedProjectIds] = useState<number[]>((data as any).featuredProjectIds ?? []);
   const [projectDescriptionOverrides, setProjectDescriptionOverrides] = useState<Record<string, string>>((data as any).projectDescriptionOverrides ?? {});
-  const [descOverridePreviews, setDescOverridePreviews] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<"profile" | "experiences" | "projects" | "certifications" | "settings">("profile");
   const [credlyBadges, setCredlyBadges] = useState<{ id: string; name?: string; imageUrl?: string; issuer?: string; label?: string }[]>(((data as any).credlyBadges as any[]) ?? []);
   const [credlyInput, setCredlyInput] = useState("");
@@ -122,7 +125,6 @@ const Home = () => {
     await patchMe({ credlyBadges: next });
     setCredlyAdding(false);
   }, [credlyBadges, patchMe, showModal]);
-  const [bioPreview, setBioPreview] = useState(false);
   const [workExperiences, setWorkExperiences] = useState<WorkExperience[]>([]);
   const [expLoading, setExpLoading] = useState(true);
   const [showAddExp, setShowAddExp] = useState(false);
@@ -358,483 +360,165 @@ const Home = () => {
               </div>
 
               {activeTab === "profile" && (
-                <div className="space-y-6 pt-1">
-                  <div>
-                    <p className="text-sm font-medium text-neutral-200 mb-1">Profile Photo</p>
-                    <p className="text-xs text-neutral-500 mb-3">Choose what appears as your photo on the CV.</p>
-                    <div className="flex rounded-lg border border-neutral-700 overflow-hidden w-fit mb-4">
-                      {([
-                        { value: "none", label: "None" },
-                        { value: "42campus", label: "42 Campus" },
-                        { value: "custom", label: "Custom" },
-                      ] as const).map(({ value, label }) => (
-                        <button key={value}
-                          onClick={async () => {
-                            setPhotoMode(value);
-                            await patchMe({ photoMode: value });
-                          }}
-                          className={`px-3 py-1.5 text-xs font-medium transition-colors ${photoMode === value ? "bg-neutral-600 text-white" : "bg-neutral-800 text-neutral-400 hover:text-neutral-200"}`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                    {photoMode === "custom" && (
-                      <div className="flex items-start gap-4">
-                        {customPhotoUrl && (
-                          <div className="relative shrink-0">
-                            <img src={customPhotoUrl} alt="Custom photo" className="w-16 h-16 rounded-full object-cover border-2 border-neutral-700" />
-                            <button
-                              onClick={async () => {
-                                try {
-                                  await axios.delete("/api/upload-photo");
-                                  setCustomPhotoUrl("");
-                                  setPhotoMode("none");
-                                } catch (err: any) {
-                                  const msg = err?.response?.data?.error ?? "Failed to delete photo.";
-                                  showModal({ title: "Error", message: msg, icon: "alert" });
-                                }
-                              }}
-                              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-neutral-900 border border-neutral-600 flex items-center justify-center text-neutral-400 hover:text-red-400 hover:border-red-700 transition-colors"
-                              title="Remove photo"
-                            >
-                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                            </button>
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <label className={`flex items-center justify-center w-full h-16 border-2 border-dashed border-neutral-700 rounded-lg cursor-pointer hover:border-neutral-500 transition-colors ${photoUploading ? "opacity-50 pointer-events-none" : ""}`}>
-                            <span className="text-xs text-neutral-500 text-center">{photoUploading ? "Uploading…" : "Click to upload JPG/PNG · max 200 KB · square recommended"}</span>
-                            <input type="file" accept="image/jpeg,image/png" className="hidden"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                if (file.size > 200 * 1024) { showModal({ title: "File too large", message: "Image must be under 200 KB.", icon: "alert" }); return; }
-                                setPhotoUploading(true);
-                                const reader = new FileReader();
-                                reader.onload = async () => {
-                                  try {
-                                    const { data: res } = await axios.post("/api/upload-photo", { dataUrl: reader.result });
-                                    setCustomPhotoUrl(res.url);
-                                    setPhotoMode("custom");
-                                  } catch (err: any) {
-                                    showModal({ title: "Upload failed", message: err?.response?.data?.error ?? "Something went wrong.", icon: "alert" });
-                                  } finally {
-                                    setPhotoUploading(false);
-                                  }
-                                };
-                                reader.readAsDataURL(file);
-                              }}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <hr className="border-neutral-800" />
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-sm font-medium text-neutral-200">Bio</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-neutral-600">Markdown available: **bold**, *italic*, `code`</span>
-                        <button onClick={() => setBioPreview((v) => !v)}
-                          className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${bioPreview ? "border-green-700 text-green-400 bg-green-950/30" : "border-neutral-700 text-neutral-500 hover:text-neutral-300"}`}
-                        >
-                          {bioPreview ? "Edit" : "Preview"}
-                        </button>
-                      </div>
-                    </div>
-                    {bioPreview ? (
-                      <div className="min-h-[120px] w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 space-y-1.5">
-                        {bio.split("\n").filter(Boolean).map((line, i) => (
-                          <p key={i} className="text-sm leading-relaxed text-neutral-300">{renderMd(line, "px-1 py-0.5 rounded text-[11px] bg-neutral-700 text-neutral-200")}</p>
-                        ))}
-                        {!bio && <p className="text-neutral-600 text-sm">Nothing to preview yet.</p>}
-                      </div>
-                    ) : (
-                      <textarea
-                        value={bio}
-                        placeholder="e.g. Systems engineer specialised in C/C++, looking for a backend role."
-                        onChange={(e) => setBio(e.target.value)}
-                        onBlur={async () => { await patchMe({ bio }); }}
-                        rows={6}
-                        maxLength={400}
-                        className="w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600 resize-none"
-                      />
-                    )}
-                    <p className="text-xs text-neutral-600 text-right mt-1">{bio.length}/400</p>
-                  </div>
-
-                  <hr className="border-neutral-800" />
-
-                  <div>
-                    <p className="text-sm font-medium text-neutral-200 mb-3">Contact & Links</p>
-                    <div className="space-y-2">
-                      {([
-                        { label: "GitHub", value: githubUrl, set: setGithubUrl, key: "githubUrl", placeholder: "https://github.com/username", maxLength: 2000 },
-                        { label: "LinkedIn", value: linkedinUrl, set: setLinkedinUrl, key: "linkedinUrl", placeholder: "https://linkedin.com/in/username", maxLength: 2000 },
-                        { label: "Website", value: websiteUrl, set: setWebsiteUrl, key: "websiteUrl", placeholder: "https://yourwebsite.com", maxLength: 2000 },
-                        { label: "Address", value: address, set: setAddress, key: "address", placeholder: "City, Country", maxLength: 200 },
-                        { label: "Phone", value: phone, set: setPhone, key: "phone", placeholder: "+41 79 000 00 00", maxLength: 20 },
-                      ] as const).map(({ label, value, set, key, placeholder, maxLength }) => (
-                        <div key={key} className="flex items-center gap-3">
-                          <span className="text-xs text-neutral-400 w-20 shrink-0">{label}</span>
-                          <input type="text" value={value} placeholder={placeholder} maxLength={maxLength} onChange={(e) => set(e.target.value)}
-                            onBlur={async () => { await patchMe({ [key]: value }); }}
-                            className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <hr className="border-neutral-800" />
-
-                  <div>
-                    <div className="flex items-baseline justify-between mb-1">
-                      <p className="text-sm font-medium text-neutral-200">Skill Tags</p>
-                      <span className="text-[10px] text-neutral-600">e.g. Programming, Tools, Languages</span>
-                    </div>
-                    <p className="text-xs text-neutral-500 mb-3">Freeform skill categories shown in the Overview sidebar.</p>
-                    <SkillTagsEditor
-                      value={skillTags}
-                      onChange={async (next) => {
-                        setSkillTags(next);
-                        await patchMe({ skillTags: next });
-                      }}
-                    />
-                  </div>
-
-                  <hr className="border-neutral-800" />
-
-                  {(data.extended42Data.achievements ?? []).length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-neutral-200 mb-1">Achievements on CV</p>
-                      <p className="text-xs text-neutral-500 mb-3">Select which achievements to show on your public profile.</p>
-                      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                        {(data.extended42Data.achievements as any[]).filter((a) => a.visible !== false).map((a) => {
-                          const checked = selectedAchievementIds.includes(a.id);
-                          return (
-                            <label key={a.id} className="flex items-start gap-3 cursor-pointer group">
-                              <input type="checkbox" checked={checked} onChange={async () => {
-                                const next = checked ? selectedAchievementIds.filter((id) => id !== a.id) : [...selectedAchievementIds, a.id];
-                                setSelectedAchievementIds(next);
-                                await patchMe({ selectedAchievementIds: next });
-                              }} className="mt-0.5 accent-green-500 shrink-0" />
-                              <div>
-                                <p className="text-xs font-medium text-neutral-300 group-hover:text-white transition-colors">{a.name}</p>
-                                <p className="text-xs text-neutral-500">{a.description}</p>
-                              </div>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <ProfileTab
+                  photoMode={photoMode}
+                  customPhotoUrl={customPhotoUrl}
+                  photoUploading={photoUploading}
+                  onPhotoModeChange={async (mode) => {
+                    setPhotoMode(mode);
+                    await patchMe({ photoMode: mode });
+                  }}
+                  onPhotoUpload={async (file) => {
+                    if (file.size > 200 * 1024) { showModal({ title: "File too large", message: "Image must be under 200 KB.", icon: "alert" }); return; }
+                    setPhotoUploading(true);
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                      try {
+                        const { data: res } = await axios.post("/api/upload-photo", { dataUrl: reader.result });
+                        setCustomPhotoUrl(res.url);
+                        setPhotoMode("custom");
+                      } catch (err: any) {
+                        showModal({ title: "Upload failed", message: err?.response?.data?.error ?? "Something went wrong.", icon: "alert" });
+                      } finally {
+                        setPhotoUploading(false);
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  onPhotoDelete={async () => {
+                    try {
+                      await axios.delete("/api/upload-photo");
+                      setCustomPhotoUrl("");
+                      setPhotoMode("none");
+                    } catch (err: any) {
+                      showModal({ title: "Error", message: err?.response?.data?.error ?? "Failed to delete photo.", icon: "alert" });
+                    }
+                  }}
+                  bio={bio}
+                  onBioChange={setBio}
+                  onBioBlur={async () => { await patchMe({ bio }); }}
+                  contacts={{ githubUrl, linkedinUrl, websiteUrl, address, phone }}
+                  onContactChange={(key, value) => {
+                    const setters: Record<string, (v: string) => void> = { githubUrl: setGithubUrl, linkedinUrl: setLinkedinUrl, websiteUrl: setWebsiteUrl, address: setAddress, phone: setPhone };
+                    setters[key]?.(value);
+                  }}
+                  onContactBlur={async (key) => {
+                    const values: Record<string, string> = { githubUrl, linkedinUrl, websiteUrl, address, phone };
+                    await patchMe({ [key]: values[key] });
+                  }}
+                  skillTags={skillTags}
+                  onSkillTagsChange={async (next) => {
+                    setSkillTags(next);
+                    await patchMe({ skillTags: next });
+                  }}
+                  achievements={data.extended42Data.achievements ?? []}
+                  selectedAchievementIds={selectedAchievementIds}
+                  onAchievementToggle={async (id) => {
+                    const next = selectedAchievementIds.includes(id)
+                      ? selectedAchievementIds.filter((i) => i !== id)
+                      : [...selectedAchievementIds, id];
+                    setSelectedAchievementIds(next);
+                    await patchMe({ selectedAchievementIds: next });
+                  }}
+                />
               )}
 
               {activeTab === "experiences" && (
-                <div className="space-y-4 pt-1">
-                  <div>
-                    <p className="text-sm font-medium text-neutral-200 mb-1">Professional Experiences</p>
-                    <p className="text-xs text-neutral-500 mb-3">
-                      Any professional experience: full-time jobs, internships, apprenticeships, work-study or freelance.<br />
-                      Entries with a company name, start date and description appear on your CV.
-                    </p>
-                    <div className="mb-3 px-3 py-2 rounded-md bg-amber-950/30 border border-amber-900/50 text-xs text-amber-400">
-                      The 42 API doesn&apos;t expose contract details - fill in all fields manually, including for 42-validated entries.
-                    </div>
-                    {expLoading ? (
-                      <p className="text-xs text-neutral-500">Loading…</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {workExperiences.map((exp) => (
-                          <div key={exp.id} className="px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-md">
-                            {editingExpId === exp.id ? (
-                              <ExpForm form={expForm} setForm={setExpForm} validatedWork42={validatedWork42} onSave={saveExp} onCancel={resetExpForm} />
-                            ) : (
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="text-sm font-medium text-neutral-200 truncate">
-                                    {exp.companyName || <span className="text-neutral-500 italic">No company</span>}
-                                    {exp.companyCity ? ` · ${exp.companyCity}` : ""}
-                                  </p>
-                                  <p className="text-xs text-neutral-400">
-                                    {exp.jobTitle ? `${exp.jobTitle} · ` : ""}{getEmploymentLabel(exp.employmentType)}
-                                    {exp.finalScore !== null && (
-                                      <span className="ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-semibold border" style={{ color: "#22c55e", backgroundColor: "rgba(34,197,94,0.10)", borderColor: "rgba(34,197,94,0.30)" }}>{exp.finalScore}</span>
-                                    )}
-                                  </p>
-                                  <p className="text-[11px] text-neutral-500 mt-0.5">{formatDateRange(exp.startDate, exp.endDate)}</p>
-                                </div>
-                                <div className="flex gap-2 shrink-0">
-                                  <button onClick={() => startEditExp(exp)} className="text-xs text-neutral-400 hover:text-neutral-200 transition-colors">Edit</button>
-                                  <button onClick={() => showModal({ title: "Delete experience", message: "This action cannot be undone.", icon: "trash", confirmLabel: "Delete", confirmVariant: "red", cancelLabel: "Cancel", onConfirm: () => deleteExp(exp.id) })} className="text-xs text-red-500 hover:text-red-400 transition-colors">Delete</button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        {showAddExp ? (
-                          <div className="px-3 py-3 bg-neutral-800 border border-neutral-700 rounded-md">
-                            <ExpForm form={expForm} setForm={setExpForm} validatedWork42={validatedWork42} onSave={saveExp} onCancel={resetExpForm} />
-                          </div>
-                        ) : (
-                          <button onClick={() => { resetExpForm(); setShowAddExp(true); }} className="w-full py-2 text-xs text-neutral-500 hover:text-neutral-300 border border-dashed border-neutral-700 rounded-md transition-colors">
-                            + Add experience
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <ExperiencesTab
+                  workExperiences={workExperiences}
+                  loading={expLoading}
+                  showAddForm={showAddExp}
+                  editingExpId={editingExpId}
+                  expForm={expForm}
+                  validatedWork42={validatedWork42}
+                  onFormChange={setExpForm}
+                  onSave={saveExp}
+                  onCancel={resetExpForm}
+                  onStartEdit={startEditExp}
+                  onDelete={(exp) => showModal({ title: "Delete experience", message: "This action cannot be undone.", icon: "trash", confirmLabel: "Delete", confirmVariant: "red", cancelLabel: "Cancel", onConfirm: () => deleteExp(exp.id) })}
+                  onAddNew={() => { resetExpForm(); setShowAddExp(true); }}
+                />
               )}
 
               {activeTab === "projects" && (
-                <div className="space-y-6 pt-1">
-                  <div>
-                    <p className="text-sm font-medium text-neutral-200 mb-1">Featured Projects</p>
-                    <p className="text-xs text-neutral-500 mb-3">Up to 5 projects shown pre-expanded in the Overview tab. Check to select, order is preserved.</p>
-                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                      {projectList.filter((p: any) => p["validated?"]).map((project: any) => {
-                        const idx = featuredProjectIds.indexOf(project.id);
-                        const checked = idx !== -1;
-                        return (
-                          <label key={project.id} className="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" checked={checked} disabled={!checked && featuredProjectIds.length >= 5}
-                              onChange={async () => {
-                                const next = checked ? featuredProjectIds.filter((id) => id !== project.id) : [...featuredProjectIds, project.id];
-                                setFeaturedProjectIds(next);
-                                await patchMe({ featuredProjectIds: next });
-                              }}
-                              className="accent-green-500 shrink-0"
-                            />
-                            {checked && <span className="text-[10px] text-neutral-500 w-4 shrink-0 text-center">{idx + 1}</span>}
-                            <div className="flex-1 flex items-center gap-2 min-w-0">
-                              <span className="text-xs font-medium text-neutral-300 group-hover:text-white transition-colors truncate">{project.project.name}</span>
-                              <span className="text-[10px] text-neutral-600 shrink-0">{project.final_mark ?? "-"}</span>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {featuredProjectIds.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-neutral-200 mb-1">Featured Project Descriptions</p>
-                      <p className="text-xs text-neutral-500 mb-3">Override the auto-fetched description for each featured project. Leave blank to keep the default.</p>
-                      <div className="space-y-3">
-                        {projectList.filter((p: any) => featuredProjectIds.includes(p.id)).map((project: any) => {
-                          const slug = project.project.slug;
-                          const preview = !!descOverridePreviews[slug];
-                          const val = projectDescriptionOverrides[slug] ?? "";
-                          return (
-                            <div key={project.id}>
-                              <div className="flex items-center justify-between mb-1">
-                                <p className="text-xs text-neutral-400 truncate">{project.project.name}</p>
-                                <div className="flex items-center gap-2 shrink-0 ml-2">
-                                  <span className="text-[10px] text-neutral-600">Markdown available: **bold**, *italic*, `code`</span>
-                                  <button onClick={() => setDescOverridePreviews((p) => ({ ...p, [slug]: !p[slug] }))}
-                                    className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${preview ? "border-green-700 text-green-400 bg-green-950/30" : "border-neutral-700 text-neutral-500 hover:text-neutral-300"}`}
-                                  >
-                                    {preview ? "Edit" : "Preview"}
-                                  </button>
-                                </div>
-                              </div>
-                              {preview ? (
-                                <div className="min-h-[60px] w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 space-y-1">
-                                  {val.split("\n").filter(Boolean).map((line, i) => (
-                                    <p key={i} className="text-sm leading-relaxed text-neutral-300">{renderMd(line, "px-1 py-0.5 rounded text-[11px] bg-neutral-700 text-neutral-200")}</p>
-                                  ))}
-                                  {!val && <p className="text-neutral-600 text-sm">Nothing to preview yet.</p>}
-                                </div>
-                              ) : (
-                                <textarea
-                                  value={val}
-                                  placeholder="Leave blank to use the default description…"
-                                  rows={2}
-                                  onChange={(e) => setProjectDescriptionOverrides((prev) => ({ ...prev, [slug]: e.target.value }))}
-                                  onBlur={async () => {
-                                    await patchMe({ projectDescriptionOverrides });
-                                  }}
-                                  className="w-full text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600 resize-none"
-                                />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <p className="text-sm font-medium text-neutral-200 mb-1">Project GitHub Links</p>
-                    <p className="text-xs text-neutral-500 mb-3">Link each project to its GitHub repo - recruiters see a clickable icon on your CV.</p>
-                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                      {projectList.map((project) => {
-                        const slug = project.project.slug;
-                        const currentUrl = projectGithubLinks[slug] ?? "";
-                        return (
-                          <div key={project.id} className="flex items-center gap-3">
-                            <span className="text-xs text-neutral-400 w-36 shrink-0 truncate" title={project.project.name}>{project.project.name}</span>
-                            <input type="text" value={currentUrl} placeholder="https://github.com/user/repo"
-                              onChange={(e) => setProjectGithubLinks((prev) => ({ ...prev, [slug]: e.target.value }))}
-                              onBlur={async () => {
-                                const val = currentUrl.trim();
-                                try {
-                                  if (val) {
-                                    await axios.put("/api/project-github-links", { projectSlug: slug, githubUrl: val });
-                                    setProjectGithubLinks((prev) => ({ ...prev, [slug]: val }));
-                                  } else {
-                                    await axios.delete("/api/project-github-links", { data: { projectSlug: slug } });
-                                    setProjectGithubLinks((prev) => { const next = { ...prev }; delete next[slug]; return next; });
-                                  }
-                                } catch (err: any) {
-                                  const msg = err?.response?.data?.error ?? "Failed to save link.";
-                                  showModal({ title: "Invalid URL", message: msg, icon: "alert" });
-                                  setProjectGithubLinks((prev) => ({ ...prev }));
-                                }
-                              }}
-                              className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
+                <ProjectsTab
+                  projectList={projectList}
+                  featuredProjectIds={featuredProjectIds}
+                  projectDescriptionOverrides={projectDescriptionOverrides}
+                  projectGithubLinks={projectGithubLinks}
+                  onFeaturedToggle={async (projectId) => {
+                    const next = featuredProjectIds.includes(projectId)
+                      ? featuredProjectIds.filter((id) => id !== projectId)
+                      : [...featuredProjectIds, projectId];
+                    setFeaturedProjectIds(next);
+                    await patchMe({ featuredProjectIds: next });
+                  }}
+                  onDescriptionOverrideChange={(slug, value) => {
+                    setProjectDescriptionOverrides((prev) => ({ ...prev, [slug]: value }));
+                  }}
+                  onDescriptionOverrideBlur={async () => { await patchMe({ projectDescriptionOverrides }); }}
+                  onGithubLinkChange={(slug, value) => {
+                    setProjectGithubLinks((prev) => ({ ...prev, [slug]: value }));
+                  }}
+                  onGithubLinkBlur={async (slug) => {
+                    const val = (projectGithubLinks[slug] ?? "").trim();
+                    try {
+                      if (val) {
+                        await axios.put("/api/project-github-links", { projectSlug: slug, githubUrl: val });
+                        setProjectGithubLinks((prev) => ({ ...prev, [slug]: val }));
+                      } else {
+                        await axios.delete("/api/project-github-links", { data: { projectSlug: slug } });
+                        setProjectGithubLinks((prev) => { const next = { ...prev }; delete next[slug]; return next; });
+                      }
+                    } catch (err: any) {
+                      const msg = err?.response?.data?.error ?? "Failed to save link.";
+                      showModal({ title: "Invalid URL", message: msg, icon: "alert" });
+                    }
+                  }}
+                />
               )}
 
               {activeTab === "certifications" && (
-                <div className="space-y-6 pt-1">
-                  <div>
-                    <p className="text-sm font-medium text-neutral-200 mb-1">Credly Badges</p>
-                    <p className="text-xs text-neutral-500 mb-3">Paste your Credly embed code, badge URL, or badge ID. Appears on your CV between Work Experience and Projects.</p>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={credlyInput}
-                        onChange={(e) => setCredlyInput(e.target.value)}
-                        placeholder='Paste embed HTML, URL, or badge ID…'
-                        disabled={credlyAdding}
-                        className="flex-1 text-sm bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md px-3 py-2 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600 disabled:opacity-50"
-                        onKeyDown={async (e) => { if (e.key === "Enter") (document.activeElement as HTMLElement)?.blur(); }}
-                        onBlur={() => addCredlyBadge(credlyInput, false)}
-                      />
-                      <button
-                        disabled={credlyAdding}
-                        onClick={() => addCredlyBadge(credlyInput, true)}
-                        className="px-3 py-2 text-sm bg-neutral-700 hover:bg-neutral-600 text-white rounded-md transition-colors shrink-0 disabled:opacity-50"
-                      >
-                        {credlyAdding ? "…" : "Add"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {credlyBadges.length > 0 && (
-                    <div className="space-y-3">
-                      {credlyBadges.map((badge, i) => (
-                        <div key={badge.id} className="flex items-center gap-3 p-3 bg-neutral-800 border border-neutral-700 rounded-lg">
-                          {badge.imageUrl && (
-                            <img src={badge.imageUrl} alt={badge.name ?? badge.id} loading="lazy" className="w-10 h-10 rounded object-contain shrink-0" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-neutral-300 truncate">{badge.name ?? badge.id}</p>
-                            {badge.issuer && <p className="text-[10px] text-neutral-500 truncate">{badge.issuer}</p>}
-                            <input
-                              type="text"
-                              value={badge.label ?? ""}
-                              placeholder="Custom label (optional)"
-                              onChange={(e) => {
-                                const next = credlyBadges.map((b, j) => j === i ? { ...b, label: e.target.value } : b);
-                                setCredlyBadges(next);
-                              }}
-                              onBlur={async () => {
-                                await patchMe({ credlyBadges });
-                              }}
-                              className="mt-1 w-full text-xs bg-neutral-900 border border-neutral-700 text-neutral-300 rounded px-2 py-1 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
-                            />
-                          </div>
-                          <button
-                            onClick={async () => {
-                              const next = credlyBadges.filter((_, j) => j !== i);
-                              setCredlyBadges(next);
-                              await patchMe({ credlyBadges: next });
-                            }}
-                            className="shrink-0 text-neutral-500 hover:text-red-400 transition-colors"
-                            title="Remove"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <CertificationsTab
+                  credlyBadges={credlyBadges}
+                  credlyInput={credlyInput}
+                  credlyAdding={credlyAdding}
+                  onInputChange={setCredlyInput}
+                  onAdd={addCredlyBadge}
+                  onRemove={async (i) => {
+                    const next = credlyBadges.filter((_, j) => j !== i);
+                    setCredlyBadges(next);
+                    await patchMe({ credlyBadges: next });
+                  }}
+                  onLabelChange={(i, label) => {
+                    setCredlyBadges((prev) => prev.map((b, j) => j === i ? { ...b, label } : b));
+                  }}
+                  onLabelBlur={async () => { await patchMe({ credlyBadges }); }}
+                />
               )}
 
               {activeTab === "settings" && (
-                <div className="space-y-5 pt-1">
-                  <label className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-neutral-200">Default CV theme</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">Initial appearance for visitors.</p>
-                    </div>
-                    <div className="flex rounded-lg border border-neutral-700 overflow-hidden shrink-0">
-                      {([{ value: false, icon: "☀️", label: "Light" }, { value: true, icon: "🌙", label: "Dark" }] as const).map(({ value, icon, label }) => (
-                        <button key={label} onClick={async () => { setDefaultDarkMode(value); await patchMe({ defaultDarkMode: value ? "true" : "false" }); }}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${defaultDarkMode === value ? "bg-neutral-600 text-white" : "bg-neutral-800 text-neutral-400 hover:text-neutral-200"}`}
-                        >
-                          <span>{icon}</span><span>{label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </label>
-
-                  <hr className="border-neutral-800" />
-
-                  <div>
-                    <p className="text-sm font-medium text-neutral-200 mb-1">Rankings</p>
-                    <p className="text-xs text-neutral-500 mb-3">Computed weekly from the full 42 network.</p>
-                    <div className="space-y-3">
-                      {([
-                        { key: "isDisplayCampusCohortRank" as const, label: "Campus cohort rank", desc: `Rank among ${primaryCampus?.name ?? "your campus"} students from the same pool year.`, value: isDisplayCampusCohortRank, set: setIsDisplayCampusCohortRank },
-                        { key: "isDisplayCohortRank" as const, label: "Cohort rank", desc: "Rank among all 42 students from the same pool year.", value: isDisplayCohortRank, set: setIsDisplayCohortRank },
-                        { key: "isDisplayAllTimeRank" as const, label: "All-time rank", desc: "Rank among all 42 students.", value: isDisplayAllTimeRank, set: setIsDisplayAllTimeRank },
-                      ] as const).map(({ key, label, desc, value, set }) => (
-                        <label key={key} className="flex items-center justify-between gap-4">
-                          <div>
-                            <p className="text-sm text-neutral-200">{label}</p>
-                            <p className="text-xs text-neutral-500 mt-0.5">{desc}</p>
-                          </div>
-                          <ToggleSwitch checked={value} onChange={async (next) => { set(next); await patchMe({ [key]: next ? "true" : "false" }); }} />
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <hr className="border-neutral-800" />
-
-                  <label className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-neutral-200">Show outstanding votes</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">Display star ratings on validated projects.</p>
-                    </div>
-                    <ToggleSwitch checked={isDisplayOutstandingVotes} onChange={async (next) => { setIsDisplayOutstandingVotes(next); await patchMe({ isDisplayOutstandingVotes: next ? "true" : "false" }); }} />
-                  </label>
-
-                  <hr className="border-neutral-800" />
-
-                  <label className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-neutral-200">Show 42 Journey tab</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">Show the Journey tab on your CV. Only visible when Resume is active.</p>
-                    </div>
-                    <ToggleSwitch checked={isDisplayJourney} onChange={async (next) => { setIsDisplayJourney(next); await patchMe({ isDisplayJourney: next ? "true" : "false" }); }} />
-                  </label>
-                </div>
+                <SettingsTab
+                  defaultDarkMode={defaultDarkMode}
+                  isDisplayCampusCohortRank={isDisplayCampusCohortRank}
+                  isDisplayCohortRank={isDisplayCohortRank}
+                  isDisplayAllTimeRank={isDisplayAllTimeRank}
+                  isDisplayOutstandingVotes={isDisplayOutstandingVotes}
+                  isDisplayJourney={isDisplayJourney}
+                  campusName={primaryCampus?.name ?? "your campus"}
+                  onToggle={async (key, value) => {
+                    const setters: Record<string, (v: boolean) => void> = {
+                      defaultDarkMode: setDefaultDarkMode,
+                      isDisplayCampusCohortRank: setIsDisplayCampusCohortRank,
+                      isDisplayCohortRank: setIsDisplayCohortRank,
+                      isDisplayAllTimeRank: setIsDisplayAllTimeRank,
+                      isDisplayOutstandingVotes: setIsDisplayOutstandingVotes,
+                      isDisplayJourney: setIsDisplayJourney,
+                    };
+                    setters[key]?.(value);
+                    await patchMe({ [key]: value ? "true" : "false" });
+                  }}
+                />
               )}
             </>
           )}

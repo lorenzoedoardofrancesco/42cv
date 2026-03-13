@@ -42,6 +42,14 @@ Generate a clean, recruiter-friendly CV page at `42cv.dev/your-login`:
 
 > Live example: [42cv.dev/lsimanic](https://42cv.dev/lsimanic)
 
+[![42cv.dev/lsimanic preview](https://image.thum.io/get/width/1200/https://42cv.dev/lsimanic)](https://42cv.dev/lsimanic)
+
+### Dashboard
+
+> Interactive demo (no login required): [42cv.dev/demo](https://42cv.dev/demo)
+
+[![42cv.dev dashboard demo](https://image.thum.io/get/width/1200/https://42cv.dev/demo)](https://42cv.dev/demo)
+
 ### Stats badge
 
 [![lsimanic's 42 stats](https://42cv.dev/api/badge/cmmdrgqgb0000lmzlzuxh3798/stats?cursusId=21&coalitionId=carbon)](https://42cv.dev)
@@ -94,15 +102,24 @@ The badge URL must return a valid SVG. If your account isn't properly linked or 
 **Can I use a custom domain?**
 Yes, deploy your own instance (see Self-hosting) and update the badge URLs to point to your domain.
 
+## 👥 Contributors
+
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/lorenzoedoardofrancesco"><img src="https://avatars.githubusercontent.com/u/115743465?v=4&s=100" width="100px;" alt=""/><br /><sub><b>lsimanic</b></sub></a><br />💻 Author</td>
+    <td align="center"><a href="https://github.com/lanzaj"><img src="https://avatars.githubusercontent.com/u/18369961?v=4&s=100" width="100px;" alt=""/><br /><sub><b>jlanza</b></sub></a><br />🤔 Feature requests</td>
+  </tr>
+</table>
+
 ## 🗂️ About this project
 
 Forked from **[badge42](https://github.com/JaeSeoKim/badge42)** by [JaeSeoKim](https://github.com/JaeSeoKim), which generated 42 stats badges for GitHub READMEs. The original service went offline in 2023 and the codebase was outdated (Next.js 12, React 17, Prisma 3).
 
 I upgraded the stack, fixed and redesigned the badge, and kept building from there. The CV page, dashboard, journey view, certifications, and everything else grew out of that original foundation.
 
-## 👥 Original Contributors
+## 👥 [badge42](https://github.com/JaeSeoKim/badge42) - Original Contributors
 
-All credit for the original implementation goes to [JaeSeoKim](https://github.com/JaeSeoKim) and the contributors below.
+All credit for the original [badge42](https://github.com/JaeSeoKim/badge42) implementation goes to [JaeSeoKim](https://github.com/JaeSeoKim) and the contributors below.
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
