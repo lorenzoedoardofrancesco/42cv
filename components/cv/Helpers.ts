@@ -32,3 +32,47 @@ export function countryToFlag(country: string | null): string | null {
   if (!code) return null;
   return String.fromCodePoint(...[...code].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
 }
+
+const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+const SHORT_MONTHS: Record<string, string> = {
+  january: "Jan", february: "Feb", march: "Mar", april: "Apr",
+  may: "May", june: "Jun", july: "Jul", august: "Aug",
+  september: "Sep", october: "Oct", november: "Nov", december: "Dec",
+};
+
+function monthNameToNum(name: string): number {
+  return MONTH_NAMES.indexOf(name.toLowerCase()) + 1; // 1-12, 0 if not found
+}
+
+/**
+ * Determine the effective cohort from begin_at (student since) with pool fallback.
+ * If begin_at and pool differ by >6 months, the student likely transferred —
+ * use pool date as the original promotion.
+ */
+export function effectiveCohort(
+  beginAt: string,
+  poolYear: string,
+  poolMonth: string,
+): { year: string; month: string } {
+  const d = new Date(beginAt);
+  const beginMonths = d.getFullYear() * 12 + d.getMonth();
+  const poolMonthNum = monthNameToNum(poolMonth);
+  const poolYearNum = parseInt(poolYear, 10);
+
+  if (poolYearNum && poolMonthNum) {
+    const poolMonths = poolYearNum * 12 + (poolMonthNum - 1);
+    if (Math.abs(beginMonths - poolMonths) > 6) {
+      return { year: poolYear, month: poolMonth };
+    }
+  }
+
+  return {
+    year: d.getFullYear().toString(),
+    month: MONTH_NAMES[d.getMonth()] ?? "",
+  };
+}
+
+export function promoLabel(year: string, month: string): string {
+  const short = SHORT_MONTHS[month.toLowerCase()];
+  return short ? `${short} ${year}` : year;
+}

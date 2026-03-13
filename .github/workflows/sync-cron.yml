@@ -1,0 +1,57 @@
+name: Sync cron jobs
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # Rankings: Sunday at 00:00 UTC
+    - cron: "0 3 * * 0" # Project descriptions: Sunday at 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "Which job to run"
+        required: true
+        type: choice
+        options:
+          - both
+          - rankings
+          - project-descriptions
+
+jobs:
+  sync-rankings:
+    if: >-
+      github.event_name == 'workflow_dispatch' && (inputs.job == 'both' || inputs.job == 'rankings')
+      || github.event_name == 'schedule' && github.event.schedule == '0 0 * * 0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx tsx scripts/sync-rankings.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FORTY_TWO_CLIENT_ID: ${{ secrets.FORTY_TWO_CLIENT_ID }}
+          FORTY_TWO_CLIENT_SECRET: ${{ secrets.FORTY_TWO_CLIENT_SECRET }}
+
+  sync-project-descriptions:
+    if: >-
+      github.event_name == 'workflow_dispatch' && (inputs.job == 'both' || inputs.job == 'project-descriptions')
+      || github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx tsx scripts/sync-project-descriptions.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FORTY_TWO_CLIENT_ID: ${{ secrets.FORTY_TWO_CLIENT_ID }}
+          FORTY_TWO_CLIENT_SECRET: ${{ secrets.FORTY_TWO_CLIENT_SECRET }}

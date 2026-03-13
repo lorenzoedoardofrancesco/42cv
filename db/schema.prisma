@@ -116,6 +116,7 @@ model RankingCache {
   login             String   @id
   level             Float?
   poolYear          String?
+  poolMonth         String?
   campusId          Int?
   allTimeRank       Int?
   allTimeTotal      Int?

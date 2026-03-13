@@ -1,7 +1,7 @@
 import { Si42 } from "@icons-pack/react-simple-icons";
 import { PublicProfile, CursusEntry, Rankings } from "./Types";
 import { ThemeTokens, levelDisplay } from "./Theme";
-import { ordinal, countryToFlag } from "./Helpers";
+import { ordinal, countryToFlag, promoLabel, effectiveCohort } from "./Helpers";
 import { renderMd } from "../common/RenderMd";
 import { GitHubIcon, LinkedInIcon, WebsiteIcon } from "../common/Icons";
 import { StatPill } from "./StatPill";
@@ -238,12 +238,16 @@ export function CvHeader({
               </div>
             )}
 
-            {rankings?.campusCohort && (
-              <StatPill label={`${profile.campus} ${profile.poolYear} rank`} shortLabel={`${profile.campus} ${profile.poolYear} rank`} value={ordinal(rankings.campusCohort.rank)} sub={`/ ${rankings.campusCohort.total}`} accent={accent} t={t} tooltip={`${ordinal(rankings.campusCohort.rank)} out of ${rankings.campusCohort.total} students at ${profile.campus} who started in ${profile.poolYear}, ranked by level`} />
-            )}
-            {rankings?.cohort && (
-              <StatPill label={`${profile.poolYear} rank`} shortLabel={`${profile.poolYear} rank`} value={ordinal(rankings.cohort.rank)} sub={`/ ${rankings.cohort.total}`} accent={accent} t={t} tooltip={`${ordinal(rankings.cohort.rank)} out of ${rankings.cohort.total} students who started at any 42 campus worldwide in ${profile.poolYear}, ranked by level`} />
-            )}
+            {rankings?.campusCohort && (() => {
+              const cohort = activeCursus ? effectiveCohort(activeCursus.begin_at, profile.poolYear, profile.poolMonth) : null;
+              const promo = cohort ? promoLabel(cohort.year, cohort.month) : profile.poolYear;
+              return <StatPill label={`${profile.campus} ${promo} rank`} shortLabel={`${profile.campus} ${promo} rank`} value={ordinal(rankings.campusCohort.rank)} sub={`/ ${rankings.campusCohort.total}`} accent={accent} t={t} tooltip={`${ordinal(rankings.campusCohort.rank)} out of ${rankings.campusCohort.total} students at ${profile.campus} who started in ${promo}, ranked by level`} />;
+            })()}
+            {rankings?.cohort && (() => {
+              const cohort = activeCursus ? effectiveCohort(activeCursus.begin_at, profile.poolYear, profile.poolMonth) : null;
+              const year = cohort?.year ?? profile.poolYear;
+              return <StatPill label={`${year} rank`} shortLabel={`${year} rank`} value={ordinal(rankings.cohort.rank)} sub={`/ ${rankings.cohort.total}`} accent={accent} t={t} tooltip={`${ordinal(rankings.cohort.rank)} out of ${rankings.cohort.total} students who started at any 42 campus worldwide in ${year}, ranked by level`} />;
+            })()}
             {rankings?.allTime && (
               <StatPill label="All-time rank" shortLabel="All-time rank" value={ordinal(rankings.allTime.rank)} sub={`/ ${rankings.allTime.total}`} accent={accent} t={t} tooltip={`${ordinal(rankings.allTime.rank)} out of ${rankings.allTime.total} active students across all 42 campuses worldwide, ranked by level`} />
             )}
