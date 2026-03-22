@@ -5,7 +5,7 @@ import AuthProvider from "../lib/auth/AuthProvider";
 
 function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
-    <SessionProvider session={session}>
+    <SessionProvider session={session} refetchInterval={0} refetchOnWindowFocus={false}>
       <AuthProvider>
         <Component {...pageProps} />
       </AuthProvider>

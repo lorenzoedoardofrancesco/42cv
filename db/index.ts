@@ -3,7 +3,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 export * from "@prisma/client";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const connectionString = process.env.DATABASE_URL?.replace(/sslmode=(?:prefer|require)\b/, "sslmode=no-verify");
+const adapter = new PrismaPg({ connectionString });
 
 let prisma: PrismaClient;
 

@@ -253,8 +253,17 @@ export default function CVPage({
   );
 }
 
+const JUNK_PATHS = new Set([
+  "wp-login.php", "wp-admin", "xmlrpc.php", ".env", "admin",
+  "wp-includes", "wp-content", ".git", "config.php",
+]);
+
 export const getServerSideProps: GetServerSideProps = async ({ params, req }) => {
   const login = params?.login as string;
+
+  if (!login || JUNK_PATHS.has(login) || login.includes(".")) {
+    return { notFound: true };
+  }
 
   try {
     const user = await prisma.user.findFirst({

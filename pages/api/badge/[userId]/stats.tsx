@@ -94,7 +94,7 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (process.env.NODE_ENV === "production") {
       const ExpiresDate = new Date();
       ExpiresDate.setSeconds(ExpiresDate.getSeconds() + EXPIRE_TIME);
-      res.setHeader("Cache-Control", `public, max-age=${EXPIRE_TIME}`);
+      res.setHeader("Cache-Control", `public, s-maxage=${EXPIRE_TIME}, stale-while-revalidate=${EXPIRE_TIME * 2}`);
       res.setHeader("Expires", ExpiresDate.toISOString());
     }
 

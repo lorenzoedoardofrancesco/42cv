@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const ogImageAt = (user as any).ogImageAt as Date | null;
 
     if (ogImageUrl && ogImageAt && Date.now() - new Date(ogImageAt).getTime() < OG_CACHE_MS) {
-      res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=7200");
+      res.setHeader("Cache-Control", "public, s-maxage=21600, stale-while-revalidate=43200");
       return res.redirect(302, ogImageUrl);
     }
 
@@ -84,7 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: { ogImageUrl: cloudinaryUrl, ogImageAt: new Date() } as any,
     });
 
-    res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=7200");
+    res.setHeader("Cache-Control", "public, s-maxage=21600, stale-while-revalidate=43200");
     return res.redirect(302, cloudinaryUrl);
   } catch (err: any) {
     console.error(`[og] Error for ${login}:`, err.message);

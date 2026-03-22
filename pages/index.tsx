@@ -280,7 +280,13 @@ const Home = () => {
   return (
     <Layout>
       <Head>
-        <title>42cv.dev</title>
+        <title>42cv.dev | Your 42 journey, recruiter-ready</title>
+        <meta name="description" content="Instant CV page and dynamic stats badges for École 42 students. Share your profile, projects, and skills with recruiters. Just sign in!" />
+        <meta property="og:title" content="42cv.dev | Your 42 journey, recruiter-ready" />
+        <meta property="og:description" content="Instant CV page and dynamic stats badges for École 42 students. Share your profile, projects, and skills with recruiters." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://42cv.dev" />
+        <meta property="og:site_name" content="42cv.dev" />
       </Head>
       <div className="flex sm:hidden justify-center pt-2 pb-1">
         <StarButton starCount={starCount} />
