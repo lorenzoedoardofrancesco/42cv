@@ -130,19 +130,19 @@ const GetHandler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
   } catch (error) {
     console.error(error);
-    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
     if (error instanceof UserNotFound) {
+      res.setHeader("Cache-Control", "public, s-maxage=300");
       return res.status(401).json({
         error: error.message,
       });
     }
     if (error instanceof FTAccountNotLinked) {
+      res.setHeader("Cache-Control", "public, s-maxage=300");
       return res.status(403).json({
         error: error.message,
       });
     }
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
     return res.status(500).json({ error: "Internal server error" });
   }
 };

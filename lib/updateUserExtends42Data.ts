@@ -30,6 +30,8 @@ export type UserType = Awaited<ReturnType<typeof getUser>> & {
   extended42Data: Extends42Data;
 };
 
+const inflight = new Map<string, Promise<UserType>>();
+
 export const updateUserExtends42Data: (
   where: { id: string } | { email: string }
 ) => Promise<UserType> = async (where) => {
@@ -47,31 +49,45 @@ export const updateUserExtends42Data: (
   ) {
     return user;
   }
-  const ftSchoolAccountId = accounts["42-school"].providerAccountId;
 
-  const [userRes, coalitionRes] = await Promise.all([
-    get42User(ftSchoolAccountId),
-    get42UserCoalition(ftSchoolAccountId),
-  ]);
-  if (!userRes || !coalitionRes) throw new Error("Failed to fetch 42 data");
-  const extended42Data = userRes.data;
-  const coalitions = coalitionRes.data;
+  const key = user.id;
+  const existing = inflight.get(key);
+  if (existing) return existing;
 
-  user = (await prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      extended42Data: {
-        ...extended42Data,
-        coalitions,
-        synced_at: Date.now(),
-      },
-    },
-    include: {
-      accounts: true,
-    },
-  })) as unknown as UserType;
+  const refresh = (async () => {
+    try {
+      const ftSchoolAccountId = accounts["42-school"].providerAccountId;
 
-  return user;
+      const [userRes, coalitionRes] = await Promise.all([
+        get42User(ftSchoolAccountId),
+        get42UserCoalition(ftSchoolAccountId),
+      ]);
+      if (!userRes || !coalitionRes) throw new Error("Failed to fetch 42 data");
+      const extended42Data = userRes.data;
+      const coalitions = coalitionRes.data;
+
+      user = (await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          extended42Data: {
+            ...extended42Data,
+            coalitions,
+            synced_at: Date.now(),
+          },
+        },
+        include: {
+          accounts: true,
+        },
+      })) as unknown as UserType;
+
+      return user;
+    } finally {
+      inflight.delete(key);
+    }
+  })();
+
+  inflight.set(key, refresh);
+  return refresh;
 };

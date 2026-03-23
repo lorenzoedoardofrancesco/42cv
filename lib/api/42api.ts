@@ -36,10 +36,27 @@ const axiosClientFor42Pagenation = async <Data = any, Params = any>(
   };
 };
 
+let tokenPromise: Promise<string> | null = null;
+async function ensureToken(): Promise<string> {
+  const cached = apiCache.get<string>("token");
+  if (cached) return cached;
+  if (!tokenPromise) {
+    tokenPromise = get42OauthToken().then(({ data: t }) => {
+      const ttl = Math.max(t.created_at + t.expires_in - Math.floor(Date.now() / 1000), 60);
+      apiCache.set("token", t.access_token, ttl);
+      tokenPromise = null;
+      return t.access_token;
+    }).catch((err) => {
+      tokenPromise = null;
+      throw err;
+    });
+  }
+  return tokenPromise;
+}
+
 axiosClientFor42.interceptors.request.use(
   async (config) => {
-    const token = apiCache.get<Get42OauthToken>("token");
-    const access_token = token ? token.access_token : null;
+    const access_token = await ensureToken();
     config.headers.set("Authorization", `Bearer ${access_token}`);
     config.headers.set("Accept", "application/json");
     return config;
@@ -66,13 +83,9 @@ axiosClientFor42.interceptors.response.use(
     }
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const { data: token } = await get42OauthToken();
-      if (token) {
-        originalRequest.headers["Authorization"] =
-          "Bearer " + token.access_token;
-        const ttl = token.created_at + token.expires_in - Date.now();
-        apiCache.set("token", token.access_token, ttl);
-      }
+      apiCache.del("token");
+      const access_token = await ensureToken();
+      originalRequest.headers["Authorization"] = "Bearer " + access_token;
       return axios(originalRequest);
     }
     return Promise.reject(error);
