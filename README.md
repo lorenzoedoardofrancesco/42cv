@@ -42,7 +42,7 @@ Generate a clean, recruiter-friendly CV page at `42cv.dev/your-login`:
 
 > Live example: [42cv.dev/lsimanic](https://42cv.dev/lsimanic)
 
-[![42cv.dev/lsimanic preview](https://image.thum.io/get/width/1200/https://42cv.dev/lsimanic)](https://42cv.dev/lsimanic)
+[![42cv.dev/lsimanic preview](https://42cv.dev/api/screenshot/lsimanic?v=1)](https://42cv.dev/lsimanic)
 
 ### Social preview (OG image)
 
@@ -54,7 +54,7 @@ Generate a clean, recruiter-friendly CV page at `42cv.dev/your-login`:
 
 > Interactive demo (no login required): [42cv.dev/demo](https://42cv.dev/demo)
 
-[![42cv.dev dashboard demo](https://res.cloudinary.com/dxzrktdeg/image/upload/v1773438079/readme/demo.png)](https://42cv.dev/demo)
+[![42cv.dev dashboard demo](https://42cv.dev/api/screenshot/demo)](https://42cv.dev/demo)
 
 ### Stats badge
 

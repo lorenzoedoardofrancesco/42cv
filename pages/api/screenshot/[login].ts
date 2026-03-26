@@ -3,8 +3,8 @@ import prisma from "../../../db";
 import fs from "fs";
 import path from "path";
 
-const OG_CACHE_MS = 6 * 60 * 60 * 1000;
-const CACHE_DIR = "/tmp/og_cache";
+const CACHE_MS = 24 * 60 * 60 * 1000;
+const CACHE_DIR = "/tmp/screenshot_cache";
 
 function ensureCacheDir() {
   if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
@@ -37,8 +37,8 @@ async function takeScreenshot(login: string): Promise<Buffer> {
         req.continue();
       }
     });
-    await page.setViewport({ width: 1200, height: 630 });
-    await page.goto(`http://localhost:3000/${login}?preview=1`, {
+    await page.setViewport({ width: 1200, height: 900 });
+    await page.goto(`http://localhost:3000/${login}`, {
       waitUntil: "networkidle0",
       timeout: 15000,
     });
@@ -57,46 +57,38 @@ export default async function handler(
   if (!login) return res.status(400).json({ error: "Missing login" });
 
   try {
-    const user = await prisma.user.findFirst({
-      where: {
-        ftSchoolVerified: true,
-        extended42Data: { path: ["login"], equals: login },
-      } as any,
-      select: {
-        id: true,
-        ogImageUrl: true,
-        ogImageAt: true,
-        isPublicProfile: true,
-      } as any,
-    });
+    if (login !== "demo") {
+      const user = await prisma.user.findFirst({
+        where: {
+          ftSchoolVerified: true,
+          extended42Data: { path: ["login"], equals: login },
+        } as any,
+        select: { isPublicProfile: true } as any,
+      });
 
-    if (!user || !(user as any).isPublicProfile) {
-      return res.status(404).json({ error: "Not found" });
+      if (!user || !(user as any).isPublicProfile) {
+        return res.status(404).json({ error: "Not found" });
+      }
     }
 
     ensureCacheDir();
     const cachePath = path.join(CACHE_DIR, `${login}.png`);
-    const ogImageAt = (user as any).ogImageAt as Date | null;
 
-    if (
-      ogImageAt &&
-      Date.now() - new Date(ogImageAt).getTime() < OG_CACHE_MS &&
-      fs.existsSync(cachePath)
-    ) {
-      const png = fs.readFileSync(cachePath);
-      res.setHeader("Content-Type", "image/png");
-      res.setHeader(
-        "Cache-Control",
-        "public, s-maxage=21600, stale-while-revalidate=43200"
-      );
-      return res.send(png);
+    if (fs.existsSync(cachePath)) {
+      const stat = fs.statSync(cachePath);
+      if (Date.now() - stat.mtimeMs < CACHE_MS) {
+        const png = fs.readFileSync(cachePath);
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=172800");
+        return res.send(png);
+      }
     }
 
     let pngBuffer: Buffer;
     try {
       pngBuffer = await takeScreenshot(login);
     } catch (err: any) {
-      console.error(`[og] Screenshot failed for ${login}:`, err.message);
+      console.error(`[screenshot] Failed for ${login}:`, err.message);
       if (fs.existsSync(cachePath)) {
         const png = fs.readFileSync(cachePath);
         res.setHeader("Content-Type", "image/png");
@@ -108,19 +100,11 @@ export default async function handler(
 
     fs.writeFileSync(cachePath, pngBuffer);
 
-    await prisma.user.update({
-      where: { id: user.id as unknown as string },
-      data: { ogImageUrl: `https://42cv.dev/api/og/${login}`, ogImageAt: new Date() } as any,
-    });
-
     res.setHeader("Content-Type", "image/png");
-    res.setHeader(
-      "Cache-Control",
-      "public, s-maxage=21600, stale-while-revalidate=43200"
-    );
+    res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=172800");
     return res.send(pngBuffer);
   } catch (err: any) {
-    console.error(`[og] Error for ${login}:`, err.message);
+    console.error(`[screenshot] Error for ${login}:`, err.message);
     return res.status(500).json({ error: "Internal error" });
   }
 }
